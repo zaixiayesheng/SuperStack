@@ -1,6 +1,6 @@
 # SuperStack
 
-Raises the item stack size to a configurable value (1000 by default) and makes containers actually accept it. Stack counts in slots are abbreviated, with the exact number on hover — the same approach Sophisticated Backpacks uses.
+Raises the item stack size to a configurable value (32768 by default) and makes containers actually accept it. Stack counts in slots are abbreviated, with the exact number on hover — the same approach Sophisticated Backpacks uses.
 
 - Minecraft 1.21.1, NeoForge 21.1+
 - License: MIT
@@ -23,8 +23,8 @@ File: `config/superstack-common.toml`. Restart the game after editing.
 
 | Option | Default | Description |
 |---|---|---|
-| `maxStackSize` | 1000 | Item stack size (64 - 1000000) |
-| `scaleSmallStacks` | true | Scale items with a smaller limit proportionally: original limit × `maxStackSize` ÷ 64 (ender pearl 16 → 250) |
+| `maxStackSize` | 32768 | Item stack size (64 - 1000000) |
+| `scaleSmallStacks` | true | Scale items with a smaller limit proportionally: original limit × `maxStackSize` ÷ 64 (ender pearl 16 → 8192) |
 | `minimumStackSizeThreshold` | 1 | Items whose original limit is at or below this are left alone (by default only unstackable things such as tools) |
 | `countDisplay` | COMPACT | How counts are drawn in slots, see below |
 | `abbreviateFrom` | 10000 | When abbreviation starts. Matches Sophisticated Backpacks by default: 1000-9999 still show `1,234`, `10.0k` starts at 10000 |

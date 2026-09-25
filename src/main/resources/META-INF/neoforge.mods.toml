@@ -8,7 +8,7 @@ version = "${version}"
 displayName = "超级堆叠"
 authors = "zaixiayesheng"
 description = '''
-把物品的堆叠上限提高到可配置的值（默认 1000）。
+把物品的堆叠上限提高到可配置的值（默认 32768）。
 
 背包、箱子、合成格这些地方都能放满一整叠；数量显示用精确数字，不会缩写成 1K。
 '''

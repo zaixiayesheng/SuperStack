@@ -9,13 +9,13 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  */
 public final class SuperStackConfig {
     /** 配置还没加载时的兜底值，跟默认值保持一致。 */
-    public static final int DEFAULT_MAX_STACK_SIZE = 1000;
+    public static final int DEFAULT_MAX_STACK_SIZE = 32768;
 
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
-            .comment("物品的堆叠上限。原版是 64，默认 1000。改完需要重启游戏。",
-                    "The new stack size limit for items. Vanilla is 64, default 1000. Restart required after changing.")
+            .comment("物品的堆叠上限。原版是 64，默认 32768。改完需要重启游戏。",
+                    "The new stack size limit for items. Vanilla is 64, default 32768. Restart required after changing.")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, 1_000_000);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
