@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.zaixiayesheng.superstack.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ContainerMixin",
+    "SlotMixin",
+    "ExtraCodecsMixin",
+    "ItemStackHandlerMixin",
+    "ComponentItemHandlerMixin"
+  ],
+  "client": [
+    "GuiGraphicsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
