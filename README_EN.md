@@ -1,12 +1,41 @@
-# SuperStack
+<h1 align="center">SuperStack</h1>
 
-Raises the item stack size to a configurable value (32768 by default) and makes containers actually accept it. Stack counts in slots are abbreviated, with the exact number on hover — the same approach Sophisticated Backpacks uses.
+<h3 align="center">超级堆叠</h3>
 
-- Minecraft 1.21.1, NeoForge 21.1+
-- License: MIT
-- Author: zaixiayesheng
+<div align="center">
 
-## What it fixes
+Raises the item stack size to a configurable value (**32768** by default) and makes containers actually accept it.
+Slot counts are abbreviated, with the exact number on hover — the same approach Sophisticated Backpacks uses.
+
+Chinese version: [README.md](./README.md)
+
+[![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-green.svg?style=flat-square)](https://www.minecraft.net)
+[![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1+-orange.svg?style=flat-square)](https://neoforged.net)
+[![Java 21](https://img.shields.io/badge/Java-21-red.svg?style=flat-square&logo=openjdk&logoColor=white)](https://adoptium.net)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![Issues](https://img.shields.io/badge/Issues-GitHub-black.svg?style=flat-square&logo=github)](https://github.com/zaixiayesheng/SuperStack/issues)
+
+</div>
+
+<div align="center">
+
+[What it fixes](#-what-it-fixes) ·
+[Features](#-features) ·
+[Install](#-install) ·
+[Config](#-config) ·
+[Count display](#-count-display) ·
+[Will it eat my items?](#-will-it-eat-my-items-measured) ·
+[How it works](#-how-it-works) ·
+[Compatibility](#-compatibility) ·
+[Building](#-building) ·
+[Changelog](#-changelog) ·
+[License & feedback](#-license--feedback)
+
+</div>
+
+---
+
+## 📖 What it fixes
 
 Vanilla caps stacks in two places:
 
@@ -15,9 +44,27 @@ Vanilla caps stacks in two places:
 
 The count display is the other problem: vanilla draws the number right-aligned without scaling, so four digits already stick out of a 16 pixel slot. The usual workaround is abbreviating to `1K`, which turns everything from 1000 to 1999 into `1K`.
 
-So this mod does three things: raise the item limit, raise the container limit, and abbreviate slot counts while keeping the exact number on hover.
+So this mod does three things: **raise the item limit, raise the container limit, and abbreviate slot counts while keeping the exact number on hover**.
 
-## Config
+## ✨ Features
+
+- **Configurable limit**: 64 - 1000000, 32768 by default
+- **Containers really accept it**: not just the item limit, the container's 99 goes away too
+- **Small stacks scale proportionally**: ender pearl 16 → 8192; tools and other unstackables stay untouched
+- **Readable counts**: 100 - 9999 show the exact number (`1,234`), abbreviation only starts at 10000 (`10.0k`), always truncated
+- **Exact value always available**: the tooltip gets an extra line with the precise count
+- **Aligned with other mods' slots**: optionally raises `ItemStackHandler` / `ComponentItemHandler` limits so sorting mods do not eat items
+- **Save/load safe**: the upper bound of `ExtraCodecs.intRange(1, 99)` becomes the configured value — a stack of 10000 survives a save and reload
+
+## 📥 Install
+
+| File | Required | Notes |
+|---|---|---|
+| `SuperStack-1.21.1-1.0.0.jar` | ✅ | drop it into `mods/` |
+| [NeoForge](https://neoforged.net) 21.1+ | ✅ | needs Java 21 |
+| [Stackcraft](https://www.curseforge.com/minecraft/mc-mods/stackcraft) | ❌ | **do not install**, functionally duplicate, logs an incompatibility |
+
+## ⚙️ Config
 
 File: `config/superstack-common.toml`. Restart the game after editing.
 
@@ -31,7 +78,7 @@ File: `config/superstack-common.toml`. Restart the game after editing.
 | `tooltipExactCount` | true | Show the exact count in the tooltip on hover (only above 99) |
 | `raiseModdedSlotLimits` | true | Also raise slot limits of other mods (`ItemStackHandler` / `ComponentItemHandler`). **On by default — turning it off makes sorting mods lose items**, see below |
 
-## Count display
+## 🔢 Count display
 
 Vanilla drawing is only taken over above 99, following Sophisticated Backpacks:
 
@@ -47,7 +94,7 @@ Vanilla drawing is only taken over above 99, following Sophisticated Backpacks:
 - However short the abbreviation gets, hovering always shows the exact count in the tooltip;
 - `countDisplay = "EXACT"` switches to always showing exact numbers (scaled to fit as well).
 
-## Will it eat my items? (measured)
+## 🗃️ Will it eat my items? (measured)
 
 This mod only changes limits and rendering — it does not touch any item movement logic. Whether something breaks comes down to whether slot limits agree everywhere:
 
@@ -74,7 +121,7 @@ The reason: Sophisticated Sorter copies slot contents into a NeoForge `ItemStack
 
 Saving and loading is fine as well: vanilla clamps counts through `ExtraCodecs.intRange(1, 99)`, and this mod replaces the upper bound with the configured value — a stack of 10000 survives a save and reload in testing.
 
-## How it works
+## 🔧 How it works
 
 | Class | What it does |
 |---|---|
@@ -84,25 +131,46 @@ Saving and loading is fine as well: vanilla clamps counts through `ExtraCodecs.i
 | `GuiGraphicsMixin` / `CountFormat` | Take over drawing above 99: abbreviate, format, scale and align |
 | `ClientEvents` | Adds the exact count line to the tooltip |
 | `ItemStackHandlerMixin` / `ComponentItemHandlerMixin` | Only active with `raiseModdedSlotLimits` on, and only ever raise a limit, never lower it |
+| `SuperStackLog` | Logs the effective stack limit of each item, for checking what actually got applied |
 
 Nothing here turns limits into absurd numbers — vanilla's 99 / 64 defaults are the only ones replaced, values set by other mods stay as they are.
 
-## Compatibility
+## 🧩 Compatibility
 
 - Functionally overlaps with **Stackcraft**; pick one (installing both logs an incompatibility).
 - Coexists with KubeJS: its `remove_slot_limit` / `default_max_stack_size` pass values through by default and will not push the limit back down.
+- Sorting mods: see the measurements above.
 - Test on a **new world**: existing oversized stacks will be rejected by vanilla validation once this mod is removed.
 
-## Building
+## 🛠️ Building
 
 Needs JDK 21.
 
-```
+```bash
 gradlew build
 ```
 
 Output lands in `build/libs/`.
 
-## License
+## 📜 Changelog
 
-[MIT](LICENSE)
+### Unreleased
+
+- `SuperStackLog`: logs the stack limit each item actually ended up with
+- Config cache is now volatile, so hot reloads take effect immediately; a summary is logged on reload
+- Minor client and GUI adjustments
+
+### 1.0.0
+
+- Configurable item stack limit (64 - 1000000, 32768 by default)
+- Small stacks scale proportionally, with a configurable threshold
+- Container / slot limits follow along, no more 99 cap
+- Count display: exact (100 - 9999), abbreviated from 10000, configurable start
+- Exact count on hover
+- Optional raise of other mods' item slot limits, so sorting does not eat items
+
+## 📄 License & feedback
+
+- License: [MIT](./LICENSE)
+- Author: zaixiayesheng
+- Issues: [GitHub Issues](https://github.com/zaixiayesheng/SuperStack/issues)
