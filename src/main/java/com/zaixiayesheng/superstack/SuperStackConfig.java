@@ -3,13 +3,26 @@ package com.zaixiayesheng.superstack;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+
 /**
  * 配置。混入（Mixin）在游戏运行中被高频调用，所以这里把值缓存在静态字段里，
  * 配置加载/重载时刷新，避免每次都去读配置对象。
+ *
+ * <p>缓存字段是 {@code volatile}：热重载发生在别的线程，而读它的有渲染线程，
+ * 不加的话可能出现「刚改完配置、游戏里还是旧值」这种要重启才好的假象。
  */
 public final class SuperStackConfig {
     /** 配置还没加载时的兜底值，跟默认值保持一致。 */
     public static final int DEFAULT_MAX_STACK_SIZE = 32768;
+
+    /** 原版的默认堆叠上限，缩放比例以它为基准。 */
+    private static final int VANILLA_MAX_STACK_SIZE = 64;
 
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -54,13 +67,13 @@ public final class SuperStackConfig {
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
-    private static int maxStackSize = DEFAULT_MAX_STACK_SIZE;
-    private static boolean scaleSmallStacks = true;
-    private static int minimumStackSizeThreshold = 1;
-    private static CountDisplay countDisplay = CountDisplay.COMPACT;
-    private static int abbreviateFrom = 10000;
-    private static boolean tooltipExactCount = true;
-    private static boolean raiseModdedSlotLimits = true;
+    private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
+    private static volatile boolean scaleSmallStacks = true;
+    private static volatile int minimumStackSizeThreshold = 1;
+    private static volatile CountDisplay countDisplay = CountDisplay.COMPACT;
+    private static volatile int abbreviateFrom = 10000;
+    private static volatile boolean tooltipExactCount = true;
+    private static volatile boolean raiseModdedSlotLimits = true;
 
     private SuperStackConfig() {
     }
@@ -99,6 +112,14 @@ public final class SuperStackConfig {
         if (event.getConfig().getSpec() != SPEC) {
             return;
         }
+
+        // 热重载和首次加载要分开报：首次报总账，重载只报「变了什么」
+        boolean firstLoad = event instanceof ModConfigEvent.Loading;
+        int previousMax = maxStackSize;
+        boolean previousScale = scaleSmallStacks;
+        CountDisplay previousDisplay = countDisplay;
+        int previousAbbreviate = abbreviateFrom;
+
         try {
             maxStackSize = MAX_STACK_SIZE.get();
             scaleSmallStacks = SCALE_SMALL_STACKS.get();
@@ -107,22 +128,84 @@ public final class SuperStackConfig {
             abbreviateFrom = ABBREVIATE_FROM.get();
             tooltipExactCount = TOOLTIP_COUNT.get();
             raiseModdedSlotLimits = RAISE_MODDED_SLOT_LIMITS.get();
-            if (!raiseModdedSlotLimits) {
-                SuperStack.LOGGER.warn("raiseModdedSlotLimits 已关闭：整理类模组（精妙整理等）整理大堆叠时可能会丢东西，"
-                        + "只有遇到机器拒收物品才建议关掉这项。");
-            }
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
-            SuperStack.LOGGER.warn("配置尚未就绪，先使用默认值", e);
+            SuperStackLog.warn("配置尚未就绪，先使用默认值", e);
+            return;
+        }
+
+        if (firstLoad) {
+            SuperStackLog.rememberConfigPath(String.valueOf(event.getConfig().getFullPath()));
+            SuperStackLog.logStartup(logSummary());
+        } else {
+            logReload(previousMax, previousScale, previousDisplay, previousAbbreviate);
+        }
+
+        logWarnings();
+    }
+
+    /** 启动时那行配置摘要，一眼能看出上限到底生效成多少。 */
+    private static String logSummary() {
+        StringBuilder sb = new StringBuilder("配置：堆叠上限 ");
+        sb.append(formatLimit(maxStackSize));
+        sb.append("（原版 64）");
+
+        sb.append("，小堆叠按比例放大：");
+        if (scaleSmallStacks) {
+            sb.append("开（").append(minimumStackSizeThreshold).append(" 以上的按 原上限×")
+                    .append(maxStackSize).append("÷64 算）");
+        } else {
+            sb.append("关（所有物品统一上限）");
+        }
+
+        sb.append("，数量显示：");
+        if (countDisplay == CountDisplay.EXACT) {
+            sb.append("精确数字");
+        } else {
+            sb.append("缩写（满 ").append(formatLimit(abbreviateFrom)).append(" 起用 k/m）");
+        }
+
+        sb.append("，其它模组的物品槽上限：").append(raiseModdedSlotLimits ? "跟随" : "不动");
+        return sb.toString();
+    }
+
+    /** 热重载时只报变化，没变就一行都不刷。 */
+    private static void logReload(int previousMax, boolean previousScale, CountDisplay previousDisplay,
+                                  int previousAbbreviate) {
+        List<String> changes = new ArrayList<>();
+        if (previousMax != maxStackSize) {
+            changes.add("堆叠上限 " + formatLimit(previousMax) + " → " + formatLimit(maxStackSize));
+        }
+        if (previousScale != scaleSmallStacks) {
+            changes.add("小堆叠按比例放大 " + (previousScale ? "开 → 关" : "关 → 开"));
+        }
+        if (previousDisplay != countDisplay) {
+            changes.add("数量显示 " + previousDisplay + " → " + countDisplay);
+        }
+        if (previousAbbreviate != abbreviateFrom) {
+            changes.add("缩写门槛 " + formatLimit(previousAbbreviate) + " → " + formatLimit(abbreviateFrom));
+        }
+
+        if (changes.isEmpty()) {
+            return;
+        }
+        SuperStackLog.info("配置已重载：" + String.join("；", changes));
+        if (previousMax != maxStackSize) {
+            SuperStackLog.warn("堆叠上限的改变对已加载的存档不会追溯生效，建议重启游戏。");
         }
     }
 
-    /** 槽位里数量的显示方式。 */
-    public enum CountDisplay {
-        /** 超过门槛后用单位缩写（12.3k、1.23m），和精妙背包一致。 */
-        COMPACT,
-        /** 一律显示精确数字（缩放到塞得下为止）。 */
-        EXACT
+    /** 配置本身没毛病、但玩法上会踩坑的地方，只在启动时报一次。 */
+    private static void logWarnings() {
+        if (scaleSmallStacks && maxStackSize < VANILLA_MAX_STACK_SIZE) {
+            SuperStackLog.warn("maxStackSize = " + maxStackSize + " 比原版的 " + VANILLA_MAX_STACK_SIZE
+                    + " 还小：原本堆 64 的物品不变，末影珍珠这类反而会被压到 " + maxStackSize + "。");
+        }
+
+        if (!raiseModdedSlotLimits) {
+            SuperStackLog.warn("raiseModdedSlotLimits 已关闭：整理类模组（精妙整理等）整理大堆叠时会截断丢东西，"
+                    + "只有遇到机器拒收物品才建议关掉这项。");
+        }
     }
 
     /** 原版 Container/Slot 的默认上限就是 99，只把这个值换成我们的上限。 */
@@ -138,5 +221,75 @@ public final class SuperStackConfig {
     /** 其它模组的物品槽上限（可选，默认不动，只升不降）。 */
     public static int raiseModdedSlotLimit(int original) {
         return raiseModdedSlotLimits ? Math.max(original, maxStackSize) : original;
+    }
+
+    // ==== 下面两个是启动日志用的，ModifyDefaultComponentsEvent 和日志共用同一套缩放规则 ====
+
+    /**
+     * 小堆叠物品的新上限：原上限 × maxStackSize ÷ 64，封顶 maxStackSize。
+     *
+     * <p>{@code scaleSmallStacks} 关掉时统一返回 maxStackSize。
+     */
+    public static int scaledMax(int vanillaMax) {
+        if (!scaleSmallStacks) {
+            return maxStackSize;
+        }
+        return (int) Math.clamp((long) vanillaMax * maxStackSize / VANILLA_MAX_STACK_SIZE, 1L, (long) maxStackSize);
+    }
+
+    /**
+     * 把「原上限 → 新上限」的对应关系缩成一行，只报用户看得懂的几档（64 / 16 / 4 …）。
+     * 顺带把缩放的边界讲清楚，省得有人以为末影珍珠也会变成 64 的倍数。
+     *
+     * <p>这里用精确数字而不是缩写：缩放比例是这张表存在的唯一理由，
+     * 写成 `16 → 8.19k` 就看不出它到底是不是整数倍了。
+     */
+    public static String summarizeDefaults(int[] vanillaSizes) {
+        Set<ScaleEntry> entries = new LinkedHashSet<>();
+        for (int vanilla : vanillaSizes) {
+            entries.add(new ScaleEntry(vanilla, scaledMax(vanilla)));
+        }
+
+        List<ScaleEntry> sorted = new ArrayList<>(new TreeSet<>(entries));
+        StringBuilder sb = new StringBuilder();
+        for (ScaleEntry entry : sorted) {
+            if (!sb.isEmpty()) {
+                sb.append("，");
+            }
+            sb.append(CountFormat.exact(entry.vanilla)).append(" → ").append(CountFormat.exact(entry.newMax));
+        }
+        return sb.toString();
+    }
+
+    /** 数量缩写，和槽位里显示的是同一套规则。 */
+    public static String formatLimit(int value) {
+        return CountFormat.compact(value);
+    }
+
+    /** 一组「原上限 → 新上限」，用来在日志里去重和排序。 */
+    private record ScaleEntry(int vanilla, int newMax) implements Comparable<ScaleEntry> {
+        @Override
+        public int compareTo(ScaleEntry other) {
+            int byNew = Integer.compare(other.newMax, newMax);
+            return byNew != 0 ? byNew : Integer.compare(other.vanilla, vanilla);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof ScaleEntry other && vanilla == other.vanilla && newMax == other.newMax;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(vanilla, newMax);
+        }
+    }
+
+    /** 槽位里数量的显示方式。 */
+    public enum CountDisplay {
+        /** 超过门槛后用单位缩写（12.3k、1.23m），和精妙背包一致。 */
+        COMPACT,
+        /** 一律显示精确数字（缩放到塞得下为止）。 */
+        EXACT
     }
 }

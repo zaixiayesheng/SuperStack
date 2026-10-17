@@ -1,6 +1,7 @@
 package com.zaixiayesheng.superstack.client;
 
 import com.zaixiayesheng.superstack.SuperStack;
+import com.zaixiayesheng.superstack.SuperStackLog;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -14,5 +15,7 @@ public class SuperStackClient {
         // 提示框显示精确数量
         IEventBus gameBus = NeoForge.EVENT_BUS;
         gameBus.register(ClientEvents.class);
+
+        SuperStackLog.info("客户端表现已就绪：槽位数量缩写 / 缩放显示、悬停显示精确数量。");
     }
 }
