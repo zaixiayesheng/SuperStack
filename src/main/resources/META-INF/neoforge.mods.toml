@@ -29,11 +29,3 @@ type = "required"
 versionRange = "[1.21.1,1.22)"
 ordering = "NONE"
 side = "BOTH"
-
-[[dependencies.superstack]]
-modId = "stackcraft"
-type = "incompatible"
-reason = "两者都改堆叠上限和数量显示，功能重复，请二选一"
-versionRange = "[0,)"
-ordering = "NONE"
-side = "BOTH"

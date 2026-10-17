@@ -62,7 +62,6 @@ So this mod does three things: **raise the item limit, raise the container limit
 |---|---|---|
 | `SuperStack-1.21.1-1.0.0.jar` | ✅ | drop it into `mods/` |
 | [NeoForge](https://neoforged.net) 21.1+ | ✅ | needs Java 21 |
-| [Stackcraft](https://www.curseforge.com/minecraft/mc-mods/stackcraft) | ❌ | **do not install**, functionally duplicate, logs an incompatibility |
 
 ## ⚙️ Config
 
@@ -137,7 +136,6 @@ Nothing here turns limits into absurd numbers — vanilla's 99 / 64 defaults are
 
 ## 🧩 Compatibility
 
-- Functionally overlaps with **Stackcraft**; pick one (installing both logs an incompatibility).
 - Coexists with KubeJS: its `remove_slot_limit` / `default_max_stack_size` pass values through by default and will not push the limit back down.
 - Sorting mods: see the measurements above.
 - Test on a **new world**: existing oversized stacks will be rejected by vanilla validation once this mod is removed.

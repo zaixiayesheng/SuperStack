@@ -26,7 +26,7 @@ public final class SuperStackLog {
 
     /**
      * 已知会和我们动同一批东西的模组（modId → 装了什么、要注意什么）。
-     * 只提示，不拦启动 —— 真拦的那种（Stackcraft）写在 neoforge.mods.toml 的 incompatible 里。
+     * 只提示，不拦启动，也不做任何 incompatibility 声明。
      */
     private static final String[][] CONFLICT_HINTS = {
             {"sophisticatedbackpacks", "精妙背包：数量缩写规则和它对齐，大堆叠在同一容器里混用时留意显示"},

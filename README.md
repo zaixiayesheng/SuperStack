@@ -62,7 +62,6 @@ English version: [README_EN.md](./README_EN.md)
 |---|---|---|
 | `SuperStack-1.21.1-1.0.0.jar` | ✅ | 放到 `mods/` 即可 |
 | [NeoForge](https://neoforged.net) 21.1+ | ✅ | 需要 Java 21 |
-| [Stackcraft](https://www.curseforge.com/minecraft/mc-mods/stackcraft) | ❌ | **不要装**，功能重复，同时装会在日志里报不兼容 |
 
 ## ⚙️ 配置
 
@@ -137,7 +136,6 @@ raiseModdedSlotLimits = true     270000 → 270000      一个不少
 
 ## 🧩 兼容性
 
-- 和 **Stackcraft** 功能重复，二选一（同时装会在日志里报不兼容）。
 - 和 KubeJS 共存没问题：它的 `remove_slot_limit` / `default_max_stack_size` 默认透传，不会把上限压回去。
 - 和整理类模组的实测见「会不会吞东西」。
 - 装了本模组后建议**新开存档**测试：已经存在的大堆叠物品在卸载本模组后会被原版校验拒绝。
