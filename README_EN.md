@@ -114,6 +114,10 @@ Output lands in `build/libs/`.
 
 ## Changelog
 
+### 1.0.3
+
+- In AE2 crafting terminals (including the wireless one and the comprehensive work terminal), crafting straight to the player inventory or the cursor no longer splits the result into stacks of 99
+
 ### 1.0.2
 
 - The crafting grid inside the Sophisticated crafting upgrade no longer stops at 99; it now takes full stacks up to the configured limit

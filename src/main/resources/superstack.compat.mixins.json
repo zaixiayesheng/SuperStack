@@ -8,6 +8,8 @@
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
     "Ae2SlotMixin",
+    "Ae2PlayerInternalInventoryMixin",
+    "Ae2CarriedItemInventoryMixin",
     "SophisticatedInventoryHandlerMixin",
     "SophisticatedStatefulComponentItemHandlerMixin"
   ],
