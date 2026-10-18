@@ -9,8 +9,8 @@ This mod replaces both with a configurable value (32768 by default) and abbrevia
 
 Chinese version: [README.md](./README.md)
 
-[![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-green.svg?style=flat-square)](https://www.minecraft.net)
-[![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1+-orange.svg?style=flat-square)](https://neoforged.net)
+[![Minecraft 1.20.1](https://img.shields.io/badge/Minecraft-1.20.1-green.svg?style=flat-square)](https://www.minecraft.net)
+[![Forge 47.4](https://img.shields.io/badge/Forge-47.4+-orange.svg?style=flat-square)](https://files.minecraftforge.net)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
 
 </div>
@@ -21,13 +21,13 @@ Chinese version: [README.md](./README.md)
 
 Vanilla caps stacks in two places.
 
-The first is the item itself: the `max_stack_size` component defaults to 64, and counts saved to disk are additionally clamped to 99 by `ExtraCodecs.intRange(1, 99)`.
+The first is the item itself: `Item.maxStackSize` defaults to 64, and both the saved count and the network sync write it as a byte, so anything above 127 overflows (32768 ends up as 0).
 
 The second is the container: `Container.getMaxStackSize()` returns 99 by default, and every container that does not override it inherits that — crafting grids, chests, your inventory. Raising the item limit alone still leaves you with 99 per slot in a crafting table.
 
 The count display is the other annoyance. Vanilla draws the number right-aligned without scaling, so four digits already stick out of a 16 pixel slot. The usual workaround is abbreviating to `1K`, which turns everything from 1000 to 1999 into `1K`.
 
-So this mod does three things: raise the item limit, raise the container limit, and abbreviate slot counts while keeping the exact number on hover. Installation is dropping the jar into `mods/`; it needs NeoForge 21.1+ and Java 21.
+So this mod does three things: raise the item limit, raise the container limit, and abbreviate slot counts while keeping the exact number on hover. Installation is dropping the jar into `mods/`; it needs Forge 47.4+ and Java 17.
 
 ## Config
 
@@ -104,7 +104,7 @@ Nothing here turns limits into absurd numbers — vanilla's 99 / 64 defaults are
 
 ## Building
 
-Needs JDK 21.
+Needs JDK 17.
 
 ```bash
 gradlew build
@@ -113,6 +113,14 @@ gradlew build
 Output lands in `build/libs/`.
 
 ## Changelog
+
+### 1.0.3
+
+- 1.20.1 (Forge 47.4) port: item limit, saved count, network sync and slot limits all raised together
+- Mekanism / Applied Energistics 2 / Sophisticated Core containers and crafting grids no longer stop at 64 / 99
+- AE2 crafting terminals no longer split crafted output into 99-sized stacks (wireless and comprehensive work terminals share the same path)
+- Sophisticated screens no longer get a second count overlay from this mod
+- Breaking a Sophisticated container no longer scatters its contents as a pile of 64-sized stacks
 
 ### 1.0.0
 

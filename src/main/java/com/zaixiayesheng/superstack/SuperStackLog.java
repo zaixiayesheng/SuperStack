@@ -1,11 +1,16 @@
 package com.zaixiayesheng.superstack;
 
-import net.neoforged.fml.ModList;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 日志。
@@ -57,12 +62,64 @@ public final class SuperStackLog {
     static void logStartup(String configSummary) {
         long elapsedMs = constructedAtNanos == 0L ? -1L : (System.nanoTime() - constructedAtNanos) / 1_000_000L;
 
-        LOGGER.info("{}超级堆叠 v{} 已加载（NeoForge 1.21.1）", PREFIX, version);
+        LOGGER.info("{}超级堆叠 v{} 已加载（Forge 1.20.1）", PREFIX, version);
         LOGGER.info("{}{}", PREFIX, configSummary);
         LOGGER.info("{}配置文件：{}{}", PREFIX, configPath,
                 elapsedMs >= 0L ? "（上限在启动 " + elapsedMs + "ms 后生效）" : "");
 
         logLoadedHints();
+    }
+
+    /**
+     * 物品注册表填完之后报一次「到底改了多少物品」。
+     *
+     * <p>1.20.1 没有数据组件，堆叠上限是 {@code Item} 上的一个字段，
+     * 由 {@code ItemMixin} 在 {@code getMaxStackSize()} 里缩放，
+     * 所以这里读的是混入保留的原始值（{@link ItemMaxStackAccess}）。
+     */
+    static void onCommonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(SuperStackLog::logAppliedLimits);
+    }
+
+    private static void logAppliedLimits() {
+        int max = SuperStackConfig.maxStackSize();
+
+        // 边改边统计。这里报的是「真正生效的结果」，不是我们以为会生效的结果
+        int changed = 0;
+        int unchanged = 0;
+        // 缩放后反而比 maxStackSize 小的原上限（原版就是 16、4 这两种），用来在日志里列出对应关系。
+        // 缩放后正好顶到 maxStackSize 的（原版 64 就是）不算，否则日志会读成「64 被缩小了」
+        Set<Integer> scaledBelowMax = new LinkedHashSet<>();
+
+        for (Item item : ForgeRegistries.ITEMS.getValues()) {
+            int vanilla = item instanceof ItemMaxStackAccess access
+                    ? access.superstack$vanillaMaxStackSize()
+                    : item.getMaxStackSize();
+            int newMax = SuperStackConfig.scaledMaxForItem(vanilla);
+            if (newMax == vanilla) {
+                unchanged++;
+                continue;
+            }
+
+            changed++;
+            if (newMax < max) {
+                scaledBelowMax.add(vanilla);
+            }
+        }
+
+        if (changed == 0) {
+            LOGGER.warn("{}没有物品的堆叠上限被改动：检查一下 maxStackSize（当前 {}）和 minimumStackSizeThreshold 是不是把范围卡没了。",
+                    PREFIX, max);
+            return;
+        }
+
+        LOGGER.info("{}已应用堆叠上限：改了 {} 个物品，保持原版上限的有 {} 个（有耐久度的工具护甲、以及默认只堆 1 个的）",
+                PREFIX, changed, unchanged);
+
+        if (!scaledBelowMax.isEmpty()) {
+            int[] sizes = scaledBelowMax.stream().mapToInt(Integer::intValue).toArray();
+            LOGGER.info("{}小堆叠按比例放大：{}", PREFIX, SuperStackConfig.summarizeDefaults(sizes));
+        }
     }
 
     /** 启动时列出「装了哪些需要留意的模组」，一行一个，没有就一行说明。 */

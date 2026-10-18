@@ -1,20 +1,18 @@
 package com.zaixiayesheng.superstack.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.zaixiayesheng.superstack.CountFormat;
 import com.zaixiayesheng.superstack.SuperStackConfig;
 import com.zaixiayesheng.superstack.SuperStackLog;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-
-import javax.annotation.Nullable;
-import java.util.Locale;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
  * 数量显示。
@@ -47,7 +45,7 @@ public abstract class GuiGraphicsMixin {
     @Unique
     private static boolean superstack$countLogged;
 
-    @WrapOperation(
+    @Redirect(
             method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V",
             at = @At(
                     value = "INVOKE",
@@ -55,12 +53,17 @@ public abstract class GuiGraphicsMixin {
             )
     )
     private int superstack$drawCount(GuiGraphics graphics, Font font, String text, int x, int y, int color,
-                                     boolean dropShadow, Operation<Integer> original,
+                                     boolean dropShadow,
                                      Font itemFont, ItemStack stack, int itemX, int itemY,
                                      @Nullable String customText) {
+        // 精妙系列的界面在数量超过 99 时会自己画缩写数量，再画一遍就叠字了
+        if (superstack$isSophisticatedScreen()) {
+            return graphics.drawString(font, text, x, y, color, dropShadow);
+        }
+
         int count = stack.getCount();
         if (count <= 99 || customText != null || text == null) {
-            return original.call(graphics, font, text, x, y, color, dropShadow);
+            return graphics.drawString(font, text, x, y, color, dropShadow);
         }
 
         String display = SuperStackConfig.countDisplay() == SuperStackConfig.CountDisplay.COMPACT
@@ -71,7 +74,7 @@ public abstract class GuiGraphicsMixin {
         if (width <= 0) {
             // 理论上到不了这里（count > 99 的文字不可能零宽），真到了就别缩放，按原样画
             SuperStackLog.warn("数量文字量不出宽度（数量 " + count + "，文字 \"" + display + "\"），已按原样绘制。");
-            return original.call(graphics, font, display, x, y, color, dropShadow);
+            return graphics.drawString(font, display, x, y, color, dropShadow);
         }
 
         float scale = Math.min(1.0F, SLOT_WIDTH / width);
@@ -90,11 +93,21 @@ public abstract class GuiGraphicsMixin {
             superstack$countLogged = true;
             SuperStackLog.debug("数量显示已接管：首次是 " + count + " 个，"
                     + "原版文字 \"" + text + "\" → 显示 \"" + display + "\"，"
-                    + "字宽 " + width + "px 缩放到 " + String.format(Locale.ROOT, "%.3f", scale) + " 倍。");
+                    + "字宽 " + width + "px 缩放到 " + String.format(java.util.Locale.ROOT, "%.3f", scale) + " 倍。");
         }
 
-        int result = original.call(graphics, font, display, drawX, drawY, color, dropShadow);
+        int result = graphics.drawString(font, display, drawX, drawY, color, dropShadow);
         pose.popPose();
         return result;
+    }
+
+    /** 当前界面是不是精妙（背包/存储）的 GUI。按类名判断，没装精妙时永远是 false。 */
+    @Unique
+    private static boolean superstack$isSophisticatedScreen() {
+        var screen = Minecraft.getInstance().screen;
+        if (screen == null) {
+            return false;
+        }
+        return screen.getClass().getName().startsWith("net.p3pp3rf1y.sophisticated");
     }
 }

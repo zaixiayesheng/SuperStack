@@ -9,8 +9,8 @@
 
 English version: [README_EN.md](./README_EN.md)
 
-[![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-green.svg?style=flat-square)](https://www.minecraft.net)
-[![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1+-orange.svg?style=flat-square)](https://neoforged.net)
+[![Minecraft 1.20.1](https://img.shields.io/badge/Minecraft-1.20.1-green.svg?style=flat-square)](https://www.minecraft.net)
+[![Forge 47.4](https://img.shields.io/badge/Forge-47.4+-orange.svg?style=flat-square)](https://files.minecraftforge.net)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
 
 </div>
@@ -21,13 +21,13 @@ English version: [README_EN.md](./README_EN.md)
 
 原版有两处把堆叠卡死。
 
-第一处是物品上限：`max_stack_size` 组件默认 64，而且存档读写时数量还会被 `ExtraCodecs.intRange(1, 99)` 卡在 99 以内。
+第一处是物品上限：`Item.maxStackSize` 默认 64；而且数量和网络同步都按 byte 读写，超过 127 就溢出（32768 会变成 0）。
 
 第二处是容器上限：`Container.getMaxStackSize()` 默认返回 99，所有没自己重写这个方法的容器都吃这个值——合成格、箱子、背包。所以光把物品上限调大，工作台里照样只放得下 99 个。
 
 数量显示是顺带的坑。原版那个数字右对齐、不缩放，四位数就戳出 16 像素的格子了。常见的做法是缩写成 `1K`，但那样 1000 到 1999 全变成 `1K`，看不出具体多少。
 
-这个模组对应做三件事：放高物品上限、放高容器上限、把数量显示做成「槽位缩写 + 悬停精确」。安装只需要把 jar 丢进 `mods/`，依赖 NeoForge 21.1+ 和 Java 21。
+这个模组对应做三件事：放高物品上限、放高容器上限、把数量显示做成「槽位缩写 + 悬停精确」。安装只需要把 jar 丢进 `mods/`，依赖 Forge 47.4+ 和 Java 17。
 
 ## 配置
 
@@ -104,7 +104,7 @@ raiseModdedSlotLimits = true     270000 → 270000      一个不少
 
 ## 构建
 
-需要 JDK 21。
+需要 JDK 17。
 
 ```bash
 gradlew build
@@ -113,6 +113,14 @@ gradlew build
 产物在 `build/libs/`。
 
 ## 更新日志
+
+### 1.0.3
+
+- 1.20.1（Forge 47.4）移植：物品上限、存档数量、网络同步、槽位上限一起改
+- 通用机械 / 应用能源 2 / 精妙核心的容器与合成格不再卡 64 / 99
+- 应用能源 2 合成终端的产物不再被拆成 99 一组（无线终端、综合工作终端同一条路径）
+- 精妙系列自己的界面不叠加本模组的数量角标
+- 拆掉精妙容器时掉落不再按 64 一组炸成一地
 
 ### 1.0.0
 

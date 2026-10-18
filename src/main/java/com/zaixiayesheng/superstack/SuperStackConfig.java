@@ -1,7 +1,7 @@
 package com.zaixiayesheng.superstack;
 
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -24,48 +24,47 @@ public final class SuperStackConfig {
     /** 原版的默认堆叠上限，缩放比例以它为基准。 */
     private static final int VANILLA_MAX_STACK_SIZE = 64;
 
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ModConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
+    private static final ForgeConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
             .comment("物品的堆叠上限。原版是 64，默认 32768。改完需要重启游戏。",
                     "The new stack size limit for items. Vanilla is 64, default 32768. Restart required after changing.")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, 1_000_000);
 
-    private static final ModConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
+    private static final ForgeConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
             .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",
                     "关掉的话所有物品统一用 maxStackSize。",
                     "Whether items with smaller vanilla stack sizes (eg. ender pearls) are scaled proportionally.")
             .define("scaleSmallStacks", true);
 
-    private static final ModConfigSpec.IntValue MIN_THRESHOLD = BUILDER
+    private static final ForgeConfigSpec.IntValue MIN_THRESHOLD = BUILDER
             .comment("原版上限不超过这个值的物品不放大。默认 1，也就是只有原本只能堆 1 个的物品（工具、桶之类）保持不变。")
             .defineInRange("minimumStackSizeThreshold", 1, 0, 64);
 
-    private static final ModConfigSpec.EnumValue<CountDisplay> COUNT_DISPLAY = BUILDER
+    private static final ForgeConfigSpec.EnumValue<CountDisplay> COUNT_DISPLAY = BUILDER
             .comment("槽位里数量怎么显示：",
                     "COMPACT —— 超过门槛后换成单位缩写（12.3k、1.23m），和精妙背包一致，默认；",
                     "EXACT —— 一律显示精确数字（缩放到塞得下为止）。",
                     "两种方式都能在提示框里看到精确数量。")
             .defineEnum("countDisplay", CountDisplay.COMPACT);
 
-    private static final ModConfigSpec.IntValue ABBREVIATE_FROM = BUILDER
+    private static final ForgeConfigSpec.IntValue ABBREVIATE_FROM = BUILDER
             .comment("数量达到多少开始用单位缩写。默认 10000（也就是 1000~9999 还是显示 1,234 这种精确写法，和精妙背包一致）。",
                     "想让它从 1000 就开始缩写就填 1000。")
             .defineInRange("abbreviateFrom", 10000, 1000, 1_000_000);
 
-    private static final ModConfigSpec.BooleanValue TOOLTIP_COUNT = BUILDER
+    private static final ForgeConfigSpec.BooleanValue TOOLTIP_COUNT = BUILDER
             .comment("鼠标悬停时在提示框里显示精确数量（数量超过 99 才显示）。")
             .define("tooltipExactCount", true);
 
-    private static final ModConfigSpec.BooleanValue RAISE_MODDED_SLOT_LIMITS = BUILDER
-            .comment("是否也放大其它模组的物品槽上限（ItemStackHandler / ComponentItemHandler）。",
-                    "默认打开：有些整理模组（比如精妙整理）整理时会先把槽位内容复制进一个这样的物品槽再排回去，",
-                    "如果这个槽位上限还停在自己的默认值（NeoForge 的是 99），大堆叠就会在整理时被截断丢掉。",
-                    "实测：10000 的堆叠 + 精妙整理整理背包，关掉这项会从 270000 掉到 2673，打开则一个不少。",
+    private static final ForgeConfigSpec.BooleanValue RAISE_MODDED_SLOT_LIMITS = BUILDER
+            .comment("是否也放大其它模组的物品槽上限（ItemStackHandler 等）。",
+                    "默认打开：有些整理模组整理时会先把槽位内容复制进一个这样的物品槽再排回去，",
+                    "如果这个槽位上限还停在自己的默认值（Forge 的是 64、容器默认 99），大堆叠就会在整理时被截断丢掉。",
                     "如果有机器因此拒收物品，再把它关掉。")
             .define("raiseModdedSlotLimits", true);
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+    static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
     private static volatile boolean scaleSmallStacks = true;
@@ -213,9 +212,12 @@ public final class SuperStackConfig {
         return original == 99 ? maxStackSize : original;
     }
 
-    /** 原版 ExtraCodecs.intRange(1, 99) 是堆叠上限的校验范围，把上界换掉。 */
-    public static int raiseCodecUpperBound(int bound) {
-        return bound == 99 ? maxStackSize : bound;
+    /** 其它模组的物品槽上限（Forge 的 ItemStackHandler 用 64 当默认值）。 */
+    public static int raiseLegacyDefault(int original) {
+        if (!raiseModdedSlotLimits) {
+            return original;
+        }
+        return original == VANILLA_MAX_STACK_SIZE || original == 99 ? maxStackSize : original;
     }
 
     /** 其它模组的物品槽上限（可选，默认不动，只升不降）。 */
@@ -223,7 +225,18 @@ public final class SuperStackConfig {
         return raiseModdedSlotLimits ? Math.max(original, maxStackSize) : original;
     }
 
-    // ==== 下面两个是启动日志用的，ModifyDefaultComponentsEvent 和日志共用同一套缩放规则 ====
+    // ==== 下面是物品堆叠上限和启动日志共用的缩放规则 ====
+
+    /**
+     * 单个物品的新上限：原上限不超过阈值（工具、桶）时原样返回，
+     * 其余按 {@link #scaledMax(int)} 缩放。
+     */
+    public static int scaledMaxForItem(int vanillaMax) {
+        if (vanillaMax <= minimumStackSizeThreshold) {
+            return vanillaMax;
+        }
+        return scaledMax(vanillaMax);
+    }
 
     /**
      * 小堆叠物品的新上限：原上限 × maxStackSize ÷ 64，封顶 maxStackSize。
@@ -234,7 +247,8 @@ public final class SuperStackConfig {
         if (!scaleSmallStacks) {
             return maxStackSize;
         }
-        return (int) Math.clamp((long) vanillaMax * maxStackSize / VANILLA_MAX_STACK_SIZE, 1L, (long) maxStackSize);
+        long scaled = (long) vanillaMax * maxStackSize / VANILLA_MAX_STACK_SIZE;
+        return (int) Math.max(1L, Math.min((long) maxStackSize, scaled));
     }
 
     /**
@@ -253,7 +267,7 @@ public final class SuperStackConfig {
         List<ScaleEntry> sorted = new ArrayList<>(new TreeSet<>(entries));
         StringBuilder sb = new StringBuilder();
         for (ScaleEntry entry : sorted) {
-            if (!sb.isEmpty()) {
+            if (sb.length() > 0) {
                 sb.append("，");
             }
             sb.append(CountFormat.exact(entry.vanilla)).append(" → ").append(CountFormat.exact(entry.newMax));

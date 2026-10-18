@@ -14,3 +14,6 @@ run-data/
 .vscode/
 .eclipse/
 bin/
+
+# 编译期兼容 jar（只给 Mixin 注解处理器解析目标，不进仓库）
+libs/

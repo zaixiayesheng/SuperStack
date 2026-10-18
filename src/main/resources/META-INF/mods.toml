@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[3,)"
+loaderVersion = "[47,)"
 license = "MIT"
 
 [[mods]]
@@ -13,19 +13,16 @@ description = '''
 背包、箱子、合成格这些地方都能放满一整叠；数量显示用精确数字，不会缩写成 1K。
 '''
 
-[[mixins]]
-config = "superstack.mixins.json"
+[[dependencies.superstack]]
+    modId = "forge"
+    mandatory = true
+    versionRange = "[${forge_version},)"
+    ordering = "NONE"
+    side = "BOTH"
 
 [[dependencies.superstack]]
-modId = "neoforge"
-type = "required"
-versionRange = "[21.1,)"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.superstack]]
-modId = "minecraft"
-type = "required"
-versionRange = "[1.21.1,1.22)"
-ordering = "NONE"
-side = "BOTH"
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "[${minecraft_version},1.21)"
+    ordering = "NONE"
+    side = "BOTH"

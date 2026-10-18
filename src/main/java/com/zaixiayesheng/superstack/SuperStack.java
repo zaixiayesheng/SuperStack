@@ -1,9 +1,10 @@
 package com.zaixiayesheng.superstack;
 
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * 超级堆叠 / Super Stack
@@ -17,12 +18,14 @@ import net.neoforged.fml.config.ModConfig;
 public class SuperStack {
     public static final String MOD_ID = "superstack";
 
-    public SuperStack(IEventBus modEventBus, ModContainer modContainer) {
+    public SuperStack() {
         // 记下构造时刻，配置加载完报「多久之后上限开始生效」
         SuperStackLog.markConstructed();
 
-        modContainer.registerConfig(ModConfig.Type.COMMON, SuperStackConfig.SPEC);
-        modEventBus.addListener(SuperStackConfig::onConfigLoad);
-        modEventBus.addListener(ModBusEvents::onModifyDefaultComponents);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SuperStackConfig.SPEC);
+
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modBus.addListener(SuperStackConfig::onConfigLoad);
+        modBus.addListener(SuperStackLog::onCommonSetup);
     }
 }
