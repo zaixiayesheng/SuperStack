@@ -114,28 +114,16 @@ Output lands in `build/libs/`.
 
 ## Changelog
 
-### 1.0.4
+### 1.0.0
 
-- Fixes 1.0.3 failing to start with Applied Energistics 2 installed: the patch targeted an interface, it now supplies the slot limit on AE2's two inventory adapters directly
-- The same spot is fixed on 1.20.1, so both versions now behave identically
-
-### 1.0.3
-
-- 1.20.1 (Forge 47.4) port: item limit, saved count, network sync and slot limits all raised together
+- First Forge 47.4 / 1.20.1 release: item limit, saved count, network sync and slot limits raised together
 - Mekanism / Applied Energistics 2 / Sophisticated Core containers and crafting grids no longer stop at 64 / 99
 - AE2 crafting terminals no longer split crafted output into 99-sized stacks (wireless and comprehensive work terminals share the same path)
 - Sophisticated screens no longer get a second count overlay from this mod
 - Breaking a Sophisticated container no longer scatters its contents as a pile of 64-sized stacks
-
-### 1.0.0
-
-- Configurable item stack limit (64 - 1000000, 32768 by default)
-- Small stacks scale proportionally, with a configurable threshold
-- Container and slot limits follow along, no more 99 cap
-- Count display: exact from 100 to 9999, abbreviated from 10000, start configurable
-- Exact count on hover
-- Optional raise of other mods' item slot limits, so sorting does not eat items
-- The effective stack limit of each item is logged on startup
+- Configurable stack limit (64 - 1000000, default 32768); smaller stacks scale proportionally with an optional threshold
+- Count display: exact up to 9999, abbreviated above, exact value on hover
+- Every item's effective limit is logged on startup
 
 ## License
 
