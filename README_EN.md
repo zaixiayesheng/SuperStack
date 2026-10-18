@@ -114,6 +114,11 @@ Output lands in `build/libs/`.
 
 ## Changelog
 
+### 1.0.4
+
+- Fixes 1.0.3 failing to start with Applied Energistics 2 installed: the patch targeted an interface, it now supplies the slot limit on AE2's two inventory adapters directly
+- The same spot is fixed on 1.20.1, so both versions now behave identically
+
 ### 1.0.3
 
 - 1.20.1 (Forge 47.4) port: item limit, saved count, network sync and slot limits all raised together
