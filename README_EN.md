@@ -114,6 +114,10 @@ Output lands in `build/libs/`.
 
 ## Changelog
 
+### 1.0.2
+
+- The crafting grid inside the Sophisticated crafting upgrade no longer stops at 99; it now takes full stacks up to the configured limit
+
 ### 1.0.1
 
 - Slot limits inside Mekanism (machine panels and internal slots), Applied Energistics 2 (network inventories and terminal slots) and the Sophisticated series (chests, backpacks, barrels) no longer stay at 64 or 99

@@ -8,7 +8,8 @@
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
     "Ae2SlotMixin",
-    "SophisticatedInventoryHandlerMixin"
+    "SophisticatedInventoryHandlerMixin",
+    "SophisticatedStatefulComponentItemHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
