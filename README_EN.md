@@ -1,3 +1,5 @@
+<p align="center"><img src="logo.png" width="160" alt="SuperStack logo"></p>
+
 <h1 align="center">SuperStack</h1>
 
 <h3 align="center">超级堆叠</h3>
