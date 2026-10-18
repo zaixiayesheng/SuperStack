@@ -1,9 +1,7 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.zaixiayesheng.superstack.SuperStackConfig;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 
 /**
  * AE2 player inventory adapter.
@@ -13,11 +11,13 @@ import org.spongepowered.asm.mixin.injection.At;
  * that adapter - most visibly the "craft to player inventory" path of the crafting terminal - is
  * therefore split into stacks of 99. Raising the reported limit lets those merges fill a stack up to
  * the configured size instead.
+ *
+ * <p>The method does not exist on the target class, only as an interface default, so it is merged in
+ * as a real override instead of being injected into an inherited body.
  */
 @Mixin(targets = "appeng.util.inv.PlayerInternalInventory", remap = false)
 public abstract class Ae2PlayerInternalInventoryMixin {
-    @ModifyReturnValue(method = "getSlotLimit(I)I", at = @At("RETURN"))
-    private int superstack$raiseSlotLimit(int original) {
-        return SuperStackConfig.raiseLegacyDefault(original);
+    public int getSlotLimit(int slot) {
+        return SuperStackConfig.raiseLegacyDefault(99);
     }
 }
