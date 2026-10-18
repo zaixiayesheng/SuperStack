@@ -4,8 +4,7 @@
 
 <div align="center">
 
-原版把堆叠卡在两个地方：物品的 <code>max_stack_size</code> 默认 64，存档读写时数量还被 99 卡着；容器的 <code>getMaxStackSize()</code> 默认也是 99。
-这个模组把这两个值换成可配置的（默认 32768），并把槽位里的数量显示改成「缩写 + 悬停看精确值」。
+把物品的堆叠上限从 64 提上去，并让容器、槽位、存档与网络同步都认这个新上限。这是 1.20.1 / Forge 47.4 的构建。
 
 English version: [README_EN.md](./README_EN.md)
 
@@ -17,113 +16,130 @@ English version: [README_EN.md](./README_EN.md)
 
 ---
 
-## 它解决什么
+## 这是什么
 
-原版有两处把堆叠卡死。
+原版把堆叠卡在三个地方，只改其中一个都没用：
 
-第一处是物品上限：`Item.maxStackSize` 默认 64；而且数量和网络同步都按 byte 读写，超过 127 就溢出（32768 会变成 0）。
+- **物品上限**：`Item.maxStackSize` 默认 64，且是 `final` 字段。
+- **存档与网络**：1.20.1 把数量写成 **byte**（`ItemStack.save()` 的 `putByte("Count", …)`，`FriendlyByteBuf.writeItemStack` 也是 `writeByte`），超过 127 会直接溢出成负数或 0。
+- **容器上限**：`Container.getMaxStackSize()` 默认返回 99，没自己重写这个方法的容器都吃这个值。
 
-第二处是容器上限：`Container.getMaxStackSize()` 默认返回 99，所有没自己重写这个方法的容器都吃这个值——合成格、箱子、背包。所以光把物品上限调大，工作台里照样只放得下 99 个。
+本模组把这三处一起抬到可配置值（默认 32768），并把槽位里的数量显示改成「缩写 + 悬停看精确值」。
 
-数量显示是顺带的坑。原版那个数字右对齐、不缩放，四位数就戳出 16 像素的格子了。常见的做法是缩写成 `1K`，但那样 1000 到 1999 全变成 `1K`，看不出具体多少。
+## 安装
 
-这个模组对应做三件事：放高物品上限、放高容器上限、把数量显示做成「槽位缩写 + 悬停精确」。安装只需要把 jar 丢进 `mods/`，依赖 Forge 47.4+ 和 Java 17。
-
-## 配置
-
-配置文件 `config/superstack-common.toml`，改完重启游戏生效。
-
-| 配置项 | 默认 | 说明 |
+| 文件 | 必需 | 说明 |
 |---|---|---|
-| `maxStackSize` | 32768 | 物品堆叠上限（64 ~ 1000000） |
-| `scaleSmallStacks` | true | 小堆叠物品按比例放大：原上限 × `maxStackSize` ÷ 64（末影珍珠 16 → 8192） |
-| `minimumStackSizeThreshold` | 1 | 原上限不超过这个值的不放大（默认只有原本堆 1 个的，比如工具） |
-| `countDisplay` | COMPACT | 槽位里的数量显示方式，见下一节 |
-| `abbreviateFrom` | 10000 | 数量到多少开始用单位缩写。默认和精妙背包一致：1000 ~ 9999 写 `1,234`，10000 起才是 `10.0k` |
-| `tooltipExactCount` | true | 悬停时在提示框里显示精确数量（超过 99 才显示） |
-| `raiseModdedSlotLimits` | true | 是否也放大其它模组的物品槽上限（`ItemStackHandler` / `ComponentItemHandler`）。默认打开，关掉后部分整理流程可能装不下整组大堆叠，见「与整理类模组的兼容」 |
+| `SuperStack-1.20.1-1.0.0.jar` | 是 | 本模组，单个 jar |
+| Minecraft 1.20.1 + Forge 47.4+ | 是 | 运行平台（需要 Java 17） |
+
+- 通用机械 10.4.16.x、应用能源 2 15.4.x、精妙核心 / 存储 / 背包都是**可选**的：装了才启用对应槽位补丁，没装自动跳过并在日志里记一行。
+- 客户端与服务端都要装，否则两边对堆叠上限的认知不一致。
+
+## 堆叠上限
+
+`maxStackSize` 控制物品上限，默认 32768（范围 64～1000000）。
+
+- 有耐久度的物品（工具、护甲、Meka 装备）不动。
+- 原本只能堆 1 个的物品不动（`minimumStackSizeThreshold = 1`）。
+- 其余物品按 `原上限 × maxStackSize ÷ 64` 等比放大，例如末影珍珠 16 → 8192、鸡蛋 16 → 8192、药水 1 不变。
+- 关掉 `scaleSmallStacks` 则一律按 `maxStackSize` 处理。
+
+1.20.1 的数量按 int 写进 NBT（字段名仍是 `Count`，类型从 byte 换成 int），网络同步改写为 VarInt，因此 32768 存盘再读回仍是 32768，联机也不会被截断。
 
 ## 数量显示
 
-数量超过 99 才接管原版的绘制，规则对着精妙背包来：
+只在数量超过 99 时接管绘制：
 
 | 数量 | 槽位里显示 |
 |---|---|
-| ≤ 99 | 原版怎么写就怎么写 |
-| 100 ~ 9999 | 精确数字，带千位分隔符：`1,234` |
-| 10000 ~ 999999 | `10.0k`、`19.9k`、`123k`、`999k` |
+| ≤ 99 | 原版写法 |
+| 100 ～ 9999 | 精确数字带千位分隔符，如 `1,234` |
+| 10000 ～ 999999 | `10.0k`、`123k`、`999k` |
 | ≥ 1000000 | `1.00m`、`2.50m` |
 
-单位一律截断不四舍五入（精妙也是截断），免得显示得比实际多。文字按当前字体宽度缩放到正好塞进 16 像素的格子，仍然贴着右下角。不管缩写得多简略，悬停时提示框里都有精确数量。`countDisplay = "EXACT"` 可以改成一律显示精确数字，同样会缩放塞进格子。
+单位一律截断不四舍五入，文字按字体宽度缩放到塞进 16 像素格子；悬停时提示框给出精确数量。
+
+## 配置
+
+配置文件 `config/superstack-common.toml`，改完重启生效。
+
+| 配置项 | 默认 | 范围 | 说明 |
+|---|---|---|---|
+| `maxStackSize` | 32768 | 64～1000000 | 物品堆叠上限 |
+| `scaleSmallStacks` | true | — | 小堆叠按比例放大，关掉则一律用上限 |
+| `minimumStackSizeThreshold` | 1 | 0～64 | 原上限不超过该值的不放大 |
+| `countDisplay` | COMPACT | COMPACT / EXACT | 槽位数量显示方式 |
+| `abbreviateFrom` | 10000 | 1000～1000000 | 多少数量开始用 k / m 缩写 |
+| `tooltipExactCount` | true | — | 悬停时显示精确数量 |
+| `raiseModdedSlotLimits` | true | — | 是否同时抬高其它模组的物品槽上限 |
+
+## 与其它模组的槽位
+
+原版容器（箱子、背包、合成格、漏斗）通过 `Slot#getMaxStackSize` 跟着本模组走；Forge 的 `ItemStackHandler` 由 `raiseModdedSlotLimits` 统一抬高（只升不降）。
+
+| 模组 | 补丁位置 | 修的是什么 |
+|---|---|---|
+| 通用机械 | `BasicInventorySlot#getLimit` | 机器内部槽与界面槽默认写死 99 |
+| 应用能源 2 | `AppEngInternalInventory#getSlotLimit`、`InternalInventoryItemHandler` | 网络库存停在 64 / 99 |
+| 应用能源 2（合成终端） | `PlayerInternalInventory` / `CarriedItemInventory` 补 `getSlotLimit` | 合成产物进入背包或光标时被拆成 99 一组 |
+| 精妙核心 / 存储 / 背包 | `InventoryHandler#getSlotLimit` | 容器槽停在 64（按 64 倍率实现） |
+
+这些补丁写在独立的 `superstack.compat.mixins.json` 里，`required: false`：目标类不存在时只记一行日志，不影响启动。
+
+Mixin 0.8.5 不支持往接口里注入，所以 1.20.1 没有给 `Container.getMaxStackSize()` 打补丁，容器侧统一在 `Slot` 层解决。
 
 ## 与整理类模组的兼容
 
-本模组只改堆叠上限和数量显示，不参与任何物品搬运。实际表现取决于各处的槽位上限是否一致：
+本模组不参与任何物品搬运，只保证「各处的上限一致」。两边不一致时，整理流程把整叠物品搬进一个默认上限 99 的处理器再排回去就会截断。
 
-| 位置 | 上限 |
+| 整理模组 | 表现 |
 |---|---|
-| 原版容器（箱子、背包、合成格、漏斗……） | 跟着 `maxStackSize` |
-| 其它模组的物品槽（`ItemStackHandler`、`ComponentItemHandler`） | 由 `raiseModdedSlotLimits` 控制，默认打开，也跟着 |
+| 一键背包整理Next | 不受影响，读取上限走 `ItemStack.getMaxStackSize()`，放不下的留在原地 |
+| 精妙背包整理 | 默认不受影响；它自带「不超过物品上限」的保护 |
 
-两边不一致时，整理模组搬运整叠物品会装不下，装不下的部分是否退回取决于该模组自己的处理方式。
+## 常见问题
 
-实测（`maxStackSize = 10000`、27 格、用精妙背包的「整理背包」）：
-
-```
-raiseModdedSlotLimits = false    270000 → 2673        少了 267327
-raiseModdedSlotLimits = true     270000 → 270000      一个不少
-```
-
-差异来自整理流程会把槽位内容放进一个默认上限 99 的物品处理器再排回去，大堆叠只能写回 99；打开 `raiseModdedSlotLimits` 后上限跟着配置走，因此这一项默认开启。
-
-| 整理模组 | 实际表现 | 说明 |
-|---|---|---|
-| 一键背包整理Next | 不受影响 | 先在本地沙盒里模拟再发原版点击，读取上限用 `ItemStack.getMaxStackSize()`，跟着本模组走，放不下的留在原地 |
-| 精妙背包整理 | 默认不受影响 | 见上面的实测；它自带「不超过物品上限」的保护，槽位上限低于物品上限时会截断 |
-
-存档读写正常：原版用 `ExtraCodecs.intRange(1, 99)` 限制数量，本模组把这个范围的上界换成配置值，实测 10000 的堆叠存盘再读回来还是 10000。
-## 实现方式
-
-| 位置 | 做法 |
-|---|---|
-| `ExtraCodecsMixin` | 把 `ExtraCodecs.intRange(1, 99)` 的上界换成配置值。原版只有两处用到这个范围：物品的 `max_stack_size` 组件和 `ItemStack.CODEC` 的 count 字段，正好都是要改的 |
-| `ModBusEvents` | `ModifyDefaultComponentsEvent` 里给每个物品设置新的 `max_stack_size`；有耐久度的、原本堆 1 个的不动 |
-| `ContainerMixin` / `SlotMixin` | 把 `getMaxStackSize()` 返回的 99 换成配置值，其它值原样保留 |
-| `GuiGraphicsMixin` / `CountFormat` | 数量超过 99 时接管绘制，负责缩写、精确写法和缩放对齐 |
-| `ClientEvents` | 提示框里补一行精确数量 |
-| `ItemStackHandlerMixin` / `ComponentItemHandlerMixin` | 只在 `raiseModdedSlotLimits` 打开时生效，而且只升不降 |
-
-全程不把上限改成天文数字，只替换原版的 99 / 64 这些默认值，其它模组自己设的数值不动。
+- **卸载后会怎样**：存档里超过原版上限的堆叠在读取时会被拒绝并记 `Tried to load invalid item`，那些物品会消失；1.20.1 的数量若是被旧版按 byte 写坏的，甚至可能读成负数。卸载前先把大堆叠拆回 64。
+- **服务端装了客户端没装**：客户端仍按 64 显示与操作，放不进去的部分由服务端拒绝，表现为「点了没反应」。
+- **精妙界面里看不到本模组的角标**：精妙自己会画数量，本模组在那类界面主动让位。
+- **合成格仍是 99**：1.20.1 的 `Container` 是接口，Mixin 0.8.5 无法注入，合成格靠 `Slot` 层抬高；如果某模组自建了槽类并覆写 `getMaxStackSize`，需要单独补。
 
 ## 兼容性
 
-- 和 KubeJS 共存没问题：它的 `remove_slot_limit` / `default_max_stack_size` 默认透传，不会把上限压回去。
-- 和整理类模组的表现见「与整理类模组的兼容」。
-- 建议新开存档测试：已经存在的大堆叠物品在卸载本模组后会被原版校验拒绝。
+- 与通用机械、应用能源 2、精妙系列一起使用时槽位上限保持一致；拆掉这些容器时掉落不再按 64 一组炸开。
+- 建议在新存档或备份后测试：这是会改变存档数据的模组。
 
-## 构建
+## 开发者
 
-需要 JDK 17。
+### 实现方式
 
-```bash
-gradlew build
-```
+| 位置 | 做法 |
+|---|---|
+| `ItemMixin` | `@Shadow @Final private int maxStackSize`，在 `getMaxStackSize` 的 HEAD 返回缩放后的值 |
+| `ItemStackMixin` | 读档时若 `Count` 是 int 就按 int 取值；存盘时数量超过 `Byte.MAX_VALUE` 就写 int |
+| `FriendlyByteBufMixin` | `writeItemStack` / `readItem` 改成 VarInt 写读数量 |
+| `SlotMixin` | 把 `getMaxStackSize()` 返回的 99 换成配置值 |
+| `ItemStackHandlerMixin` | Forge 类（`remap = false`），受 `raiseModdedSlotLimits` 控制 |
+| `GuiGraphicsMixin` / `CountFormat` | 数量 > 99 时接管绘制，负责缩写、精确写法与缩放对齐 |
+| `ClientEvents` | 提示框补一行精确数量 |
+| `mixin/compat/*` | 六个按模组划分的槽位补丁，独立配置、缺失时自动跳过 |
 
-产物在 `build/libs/`。
+### 构建
+
+需要 JDK 17 与 Forge 47.4 的开发环境，`gradlew build`，产物在 `build/libs/`。编译期需要把 Mekanism / 应用能源 2 / 精妙核心的 1.20.1 jar 放进 `libs/`（`compileOnly`，只为让 Mixin 注解处理器解析字符串目标）。
 
 ## 更新日志
 
 ### 1.0.0
 
-- 首个 Forge 47.4 / 1.20.1 版本：物品上限、存档数量、网络同步、槽位上限一起改
-- 通用机械 / 应用能源 2 / 精妙核心的容器与合成格不再卡 64 / 99
-- 应用能源 2 合成终端的产物不再被拆成 99 一组（无线终端、综合工作终端同一条路径）
-- 精妙系列自己的界面不叠加本模组的数量角标
-- 拆掉精妙容器时掉落不再按 64 一组炸成一地
-- 可配置的物品堆叠上限（64 ~ 1000000，默认 32768），小堆叠按比例放大并可设阈值跳过
-- 数量显示：100 ~ 9999 精确、10000 起缩写，悬停给精确值
-- 启动时把每个物品实际拿到的堆叠上限记进日志
+- 首个 Forge 1.20.1 版本，功能与 1.21.1 线对齐：可配置的堆叠上限（默认 32768）、小堆叠按比例放大、精确与缩写数量显示。
+- 1.20.1 的数量是 byte，改写成 int 存 NBT、VarInt 走网络，超过 127 不再溢出。
+- 带上 1.21.1 线的兼容修复：通用机械 / 应用能源 2 / 精妙系列的槽位跟着配置走，AE2 合成产物不再拆成 99 一组，精妙界面不叠角标。
+- 精妙界面不显示本模组角标；拆容器时掉落不再按 64 一组。
 
-## 许可
+## 许可证与反馈
 
 [MIT](./LICENSE) · 作者 zaixiayesheng · [问题反馈](https://github.com/zaixiayesheng/SuperStack/issues)
+
+提交问题时请附上 Minecraft 与 Forge 版本、本模组版本、`logs/latest.log`，以及涉及的容器。
