@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.zaixiayesheng.superstack.CountFormat;
 import com.zaixiayesheng.superstack.SuperStackConfig;
 import com.zaixiayesheng.superstack.SuperStackLog;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -58,6 +59,11 @@ public abstract class GuiGraphicsMixin {
                                      boolean dropShadow, Operation<Integer> original,
                                      Font itemFont, ItemStack stack, int itemX, int itemY,
                                      @Nullable String customText) {
+        // 精妙系列的界面在数量超过 99 时会自己画缩写数量，再画一遍就叠字了
+        if (superstack$isSophisticatedScreen()) {
+            return original.call(graphics, font, text, x, y, color, dropShadow);
+        }
+
         int count = stack.getCount();
         if (count <= 99 || customText != null || text == null) {
             return original.call(graphics, font, text, x, y, color, dropShadow);
@@ -96,5 +102,15 @@ public abstract class GuiGraphicsMixin {
         int result = original.call(graphics, font, display, drawX, drawY, color, dropShadow);
         pose.popPose();
         return result;
+    }
+
+    /** 当前界面是不是精妙（背包/存储）的 GUI。按类名判断，没装精妙时永远是 false。 */
+    @Unique
+    private static boolean superstack$isSophisticatedScreen() {
+        var screen = Minecraft.getInstance().screen;
+        if (screen == null) {
+            return false;
+        }
+        return screen.getClass().getName().startsWith("net.p3pp3rf1y.sophisticated");
     }
 }

@@ -29,3 +29,6 @@ type = "required"
 versionRange = "[1.21.1,1.22)"
 ordering = "NONE"
 side = "BOTH"
+
+[[mixins]]
+config = "superstack.compat.mixins.json"

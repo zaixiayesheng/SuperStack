@@ -114,6 +114,13 @@ Output lands in `build/libs/`.
 
 ## Changelog
 
+### 1.0.1
+
+- Slot limits inside Mekanism (machine panels and internal slots), Applied Energistics 2 (network inventories and terminal slots) and the Sophisticated series (chests, backpacks, barrels) no longer stay at 64 or 99
+- The Sophisticated GUIs no longer get our count overlay stacked on top of their own abbreviated count
+- Breaking those containers no longer scatters the contents as a pile of separate 64-stacks
+- The compatibility patches skip themselves when the matching mod is absent
+
 ### 1.0.0
 
 - Configurable item stack limit (64 - 1000000, 32768 by default)

@@ -1,0 +1,16 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.zaixiayesheng.superstack.mixin.compat",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MekanismBasicInventorySlotMixin",
+    "Ae2AppEngInternalInventoryMixin",
+    "Ae2InternalInventoryItemHandlerMixin",
+    "Ae2SlotMixin",
+    "SophisticatedInventoryHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

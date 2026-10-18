@@ -223,6 +223,20 @@ public final class SuperStackConfig {
         return raiseModdedSlotLimits ? Math.max(original, maxStackSize) : original;
     }
 
+    /**
+     * 模组自己写死的老上限：堆叠上限 64、容器默认值 99。
+     *
+     * <p>通用机械的槽位、应用能源的内部库存、精妙的库存分区都在各自的类里把上限
+     * 固定成这两个值，光改物品组件够不着它们。这里只替换「正好等于 64 或 99」的返回值，
+     * 1、16、1024 这类明确的小上限保持原样，免得出意外。
+     */
+    public static int raiseLegacyDefault(int original) {
+        if (!raiseModdedSlotLimits) {
+            return original;
+        }
+        return original == VANILLA_MAX_STACK_SIZE || original == 99 ? maxStackSize : original;
+    }
+
     // ==== 下面两个是启动日志用的，ModifyDefaultComponentsEvent 和日志共用同一套缩放规则 ====
 
     /**
