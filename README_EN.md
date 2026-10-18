@@ -111,17 +111,31 @@ Output lands in `build/libs/`.
 
 ## Changelog
 
+### 1.0.4
+
+- Applied Energistics 2 slot limits are now patched by adding `getSlotLimit` to the inventory classes; 1.0.3 patched classes that never declared it and failed to start with AE2 installed
+
+### 1.0.3
+
+- AE2 crafting terminals (wireless and comprehensive work terminal included) no longer split crafted output into stacks of 99 when inserting into the inventory or the cursor
+
+### 1.0.2
+
+- The 9-slot crafting grid in the Sophisticated crafting upgrade no longer stops at 99
+
+### 1.0.1
+
+- Container and slot limits follow the configured value instead of stopping at 99
+- Mekanism, Applied Energistics 2 and the Sophisticated series no longer stay at 64 or 99
+- Sophisticated GUIs no longer get a second count overlay from this mod
+- Breaking those containers no longer scatters contents as 64-sized stacks
+- Compatibility patches are skipped automatically when the related mod is absent
+
 ### 1.0.0
 
 - Configurable stack limit (64 - 1000000, default 32768); smaller stacks scale proportionally with an optional threshold
 - Count display: exact up to 9999, abbreviated above, exact value on hover
-- Container and slot limits follow the configured value instead of stopping at 99
-- Mekanism, Applied Energistics 2 and the Sophisticated series no longer stay at 64 or 99
-- AE2 crafting terminals (wireless and comprehensive work terminal included) no longer split crafted output into stacks of 99
-- The 9-slot crafting grid in the Sophisticated crafting upgrade no longer stops at 99
-- Sophisticated GUIs no longer get a second count overlay from this mod
-- Breaking those containers no longer scatters contents as 64-sized stacks
-- Compatibility patches are skipped automatically when the related mod is absent
+
 ## License
 
 [MIT](./LICENSE) · by zaixiayesheng · [issues](https://github.com/zaixiayesheng/SuperStack/issues)
