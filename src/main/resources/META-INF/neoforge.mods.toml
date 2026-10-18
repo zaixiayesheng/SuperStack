@@ -7,6 +7,7 @@ modId = "superstack"
 version = "${version}"
 displayName = "超级堆叠"
 authors = "zaixiayesheng"
+logoFile = "superstack_logo.png"
 description = '''
 把物品的堆叠上限提高到可配置的值（默认 32768）。
 
