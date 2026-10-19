@@ -33,7 +33,7 @@ This mod raises all three to a configurable value (default 32768), and replaces 
 
 | File | Required | Notes |
 |---|---|---|
-| `SuperStack-1.21.1-1.0.4.jar` | yes | The mod, single jar |
+| `SuperStack-1.21.1-21.1-1.0.5.jar` | yes | The mod, single jar |
 | Minecraft 1.21.1 + NeoForge 21.1+ | yes | Requires Java 21 |
 
 - Mekanism, Applied Energistics 2 and Sophisticated Core / Storage / Backpacks are **optional**: their slot patches only load when the mod is present, otherwise a single log line is written.
@@ -115,7 +115,7 @@ raiseModdedSlotLimits = true     270000 -> 270000      nothing lost
 ## Compatibility
 
 - KubeJS coexistence works: its `remove_slot_limit` / `default_max_stack_size` pass through and do not push the cap back down.
-- With Mekanism, Applied Energistics 2 and Sophisticated installed, slot limits follow this mod; breaking those containers no longer scatters 64-sized piles (since 1.0.1).
+- With Mekanism, Applied Energistics 2 and Sophisticated installed, slot limits follow this mod; breaking those containers no longer scatters 64-sized piles (since 21.1-1.0.1).
 - Test in a new world or a backup: this mod changes saved data by design.
 
 ## For developers
@@ -138,7 +138,7 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 
 ## Changelog
 
-### 1.0.5
+### 21.1-1.0.5
 
 - Shift-clicking the crafting result now crafts everything that fits, in one go, and no longer freezes the game. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round; with tens of thousands of items that is tens of thousands of iterations in a single tick. The mod computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once, so the cost depends on the number of slots, not on the stack size.
 - Nine stacks of iron (32768 x 9) now turn into 32768 iron blocks on a single click without timing out the server.
@@ -150,29 +150,31 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 - Sophisticated Core storage slots (backpacks, chests, barrels) follow the configured limit; they were previously pinned at 64, so a whole stack of 32768 got split into many 64s.
 - Added `pack.mcmeta`, so the resource and data pack loaders no longer report missing metadata.
 
+- Breaking a vanilla container now drops each oversized stack as a single item entity instead of scattering it into about a thousand items. A full chest used to spawn tens of thousands of item entities and stall the server.
+
 <details>
-<summary><b>1.0.4</b></summary>
+<summary><b>21.1-1.0.4</b></summary>
 
 - The AE2 slot patch now adds `getSlotLimit` directly. 1.0.3 targeted classes that only implement the interface without declaring the method, which crashed startup when AE2 was installed.
 
 </details>
 
 <details>
-<summary><b>1.0.3</b></summary>
+<summary><b>21.1-1.0.3</b></summary>
 
 - Crafted output in AE2 crafting terminals (including the wireless and the combined terminal) is no longer split into 99s when written to the inventory or cursor.
 
 </details>
 
 <details>
-<summary><b>1.0.2</b></summary>
+<summary><b>21.1-1.0.2</b></summary>
 
 - The 9-slot crafting grid of the Sophisticated crafting upgrade no longer caps at 99: the patch moved from the slot to `StatefulComponentItemHandler#getSlotLimit`.
 
 </details>
 
 <details>
-<summary><b>1.0.1</b></summary>
+<summary><b>21.1-1.0.1</b></summary>
 
 - Container and slot limits follow the config instead of stopping at 99.
 - Mekanism, AE2 and Sophisticated slots no longer stop at 64 / 99.
@@ -183,7 +185,7 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 </details>
 
 <details>
-<summary><b>1.0.0</b></summary>
+<summary><b>21.1-1.0.0</b></summary>
 
 - Configurable item stack cap (64-1,000,000, default 32768), small stacks scaled by ratio with a threshold to skip.
 - Number display: exact between 100 and 9,999, abbreviated above, exact count in the tooltip.
