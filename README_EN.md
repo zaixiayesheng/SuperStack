@@ -147,6 +147,8 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 - The tooltip now shows the current count out of the limit, for example `Count: 12,345 / 32,768`.
 - Slot numbers are scaled from the bottom-right corner of the slot, so long numbers no longer drift upwards.
 - Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64.
+- Sophisticated Core storage slots (backpacks, chests, barrels) follow the configured limit; they were previously pinned at 64, so a whole stack of 32768 got split into many 64s.
+- Added `pack.mcmeta`, so the resource and data pack loaders no longer report missing metadata.
 
 <details>
 <summary><b>1.0.4</b></summary>
