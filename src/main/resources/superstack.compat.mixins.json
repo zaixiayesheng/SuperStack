@@ -6,6 +6,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "MekanismBasicInventorySlotMixin",
+    "IronFurnacesInventoryLimitMixin",
+    "InvWrapperMixin",
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
     "Ae2AppEngInternalInventoryMixin",

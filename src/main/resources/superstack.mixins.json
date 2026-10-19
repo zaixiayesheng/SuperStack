@@ -14,6 +14,10 @@
     "FriendlyByteBufMixin",
     "CraftingMenuMixin",
     "InventoryMenuMixin",
+    "CompoundContainerMixin",
+    "AbstractFurnaceBlockEntityMixin",
+    "HopperBlockEntityMixin",
+    "RandomizableContainerBlockEntityMixin",
     "CreativeSlotLimitMixin"
   ],
   "client": [
