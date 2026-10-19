@@ -4,6 +4,7 @@
   "package": "com.zaixiayesheng.superstack.mixin.compat",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "IronFurnacesFurnaceTileMixin",
     "MekanismBasicInventorySlotMixin",
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
