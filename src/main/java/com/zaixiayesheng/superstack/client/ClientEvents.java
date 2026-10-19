@@ -6,6 +6,7 @@ import com.zaixiayesheng.superstack.SuperStackConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,7 +32,7 @@ public final class ClientEvents {
             // The slot may show an abbreviation (12.3k); hovering gives the exact current / limit.
             event.getToolTip().add(Component.translatable("superstack.tooltip.count",
                     CountFormat.exact(count),
-                    CountFormat.exact(event.getItemStack().getMaxStackSize())).withStyle(ChatFormatting.GRAY));
+                    CountFormat.exact(superstack$displayLimit(event.getItemStack()))).withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -42,5 +43,15 @@ public final class ClientEvents {
         }
         // Sophisticated backpacks / storage / core screens draw their own counts.
         return minecraft.screen.getClass().getName().startsWith("net.p3pp3rf1y.sophisticated");
+    }
+
+    /**
+     * 提示框里显示的「上限」。精妙等模组会把某些堆叠的上限设成 Integer.MAX_VALUE（表示不限），
+     * 直接显示会变成 2,147,483,647，没有意义；这里统一压到配置上限。
+     */
+    private static int superstack$displayLimit(ItemStack stack) {
+        int stackLimit = stack.getMaxStackSize();
+        int configured = SuperStackConfig.maxStackSize();
+        return stackLimit > configured ? configured : stackLimit;
     }
 }
