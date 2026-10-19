@@ -18,6 +18,6 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(targets = "appeng.util.inv.PlayerInternalInventory", remap = false)
 public abstract class Ae2PlayerInternalInventoryMixin {
     public int getSlotLimit(int slot) {
-        return SuperStackConfig.raiseLegacyDefault(99);
+        return SuperStackConfig.raiseCompatLimit(99);
     }
 }

@@ -17,6 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class MekanismBasicInventorySlotMixin {
     @ModifyReturnValue(method = "getLimit(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"))
     private int superstack$raiseSlotLimit(int original) {
-        return SuperStackConfig.raiseLegacyDefault(original);
+        return SuperStackConfig.raiseCompatLimit(original);
     }
 }

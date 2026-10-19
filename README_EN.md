@@ -115,6 +115,7 @@ The file is `config/superstack-common.toml`; restart after editing.
 | Option | Default | Range | Meaning |
 |---|---|---|---|
 | `maxStackSize` | 32768 | 64–2,147,483,647 | Item stack limit |
+| `compatStackLimit` | 1000000 | 64–2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces); kept below the stack size so third-party arithmetic cannot overflow |
 | `scaleSmallStacks` | true | — | Scale small stacks (16 → 8,192); disable to use the limit for everything |
 | `minimumStackSizeThreshold` | 1 | 0–64 | Items at or below this vanilla limit are not raised |
 | `countDisplay` | COMPACT | COMPACT / EXACT | Slot count rendering style |
@@ -185,6 +186,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ### 21.1-1.0.6
 
+- Slot limits exposed to supported mods now come from `compatStackLimit` (1,000,000 by default), so third-party code cannot overflow or allocate by the raw stack size.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
 - Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
 - Ground item merging is guarded: two big stacks no longer take part in vanilla's 64-per-step merge, which could overflow the added counts; stacks of 64 or less merge as before.

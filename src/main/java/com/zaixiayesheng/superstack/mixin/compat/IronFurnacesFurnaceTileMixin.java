@@ -24,6 +24,6 @@ public abstract class IronFurnacesFurnaceTileMixin {
             constant = @Constant(intValue = 64),
             remap = false)
     private int superstack$raiseOutputCeiling(int original) {
-        return SuperStackConfig.maxStackSize();
+        return SuperStackConfig.compatStackLimit();
     }
 }

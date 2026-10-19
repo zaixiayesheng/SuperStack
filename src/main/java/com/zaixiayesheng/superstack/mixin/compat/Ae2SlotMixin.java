@@ -14,6 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class Ae2SlotMixin {
     @ModifyReturnValue(method = "getMaxStackSize()I", at = @At("RETURN"))
     private int superstack$raiseSlotLimit(int original) {
-        return SuperStackConfig.raiseLegacyDefault(original);
+        return SuperStackConfig.raiseCompatLimit(original);
     }
 }
