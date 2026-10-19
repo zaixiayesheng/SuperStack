@@ -11,7 +11,8 @@
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
     "SophisticatedStatefulComponentItemHandlerMixin",
-    "SophisticatedCraftingUpgradeContainerMixin"
+    "SophisticatedCraftingUpgradeContainerMixin",
+    "SophisticatedStorageMenuBulkCraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1
