@@ -25,6 +25,7 @@ Vanilla caps stacks in three places, and changing only one of them does not work
 - **Item cap**: the `max_stack_size` component defaults to 64.
 - **Save and network**: `ItemStack.CODEC` only accepts a count of 1-99, and `FriendlyByteBuf` writes the count with the same bound, so a raised cap would fail to save or sync.
 - **Container cap**: `Container.getMaxStackSize()` returns 99, which every container that does not override it (crafting grids, chests, backpacks) inherits.
+- **Crafting lag**: a shift-click on the result crafts one item per iteration, so a 32768-item grid runs tens of thousands of iterations in one tick; the mod crafts the whole batch at once.
 
 This mod raises all three to a configurable value (default 32768), and replaces the stack counter in slots with an abbreviated number plus an exact count in the tooltip, because the vanilla counter overflows a 16-pixel slot at four digits.
 
@@ -141,7 +142,8 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 
 - Shift-clicking the crafting result now crafts everything that fits, in one go, and no longer freezes the game. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round; with tens of thousands of items that is tens of thousands of iterations in a single tick. The mod now computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once, so the cost depends on the number of slots, not on the stack size.
 - Nine stacks of iron (32768 x 9) now turn into 32768 iron blocks on a single click without timing out the server.
-- Recipes with remaining items (milk buckets and the like) still use the vanilla loop with a fallback limit, `maxCraftsPerClick` (default 2048); ordinary recipes ignore that value.
+- Recipes with remaining items (milk buckets and the like) are batched too: ingredients are consumed once and the container items are put back multiplied by the number of crafts.
+- Applies to the vanilla crafting table and the 2x2 grid; mods with their own crafting screens (Sophisticated, AE2) are handled separately.
 
 <details>
 <summary><b>1.0.4</b></summary>
