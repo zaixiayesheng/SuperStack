@@ -6,13 +6,16 @@
 
 <div align="center">
 
-Raises the item stack limit above 64 and makes containers, slots, world saving and network sync agree on the new cap.
+Raises the item stack limit from 64 to a configurable value (32,768 by default) and teaches containers, slots, saved data, network sync and crafting about the new limit.
 
 Chinese version: [README.md](./README.md)
 
+[![Release](https://img.shields.io/github/v/release/zaixiayesheng/SuperStack?filter=v21.1*&style=flat-square&label=Release&color=blue)](https://github.com/zaixiayesheng/SuperStack/releases)
 [![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-green.svg?style=flat-square)](https://www.minecraft.net)
 [![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1+-orange.svg?style=flat-square)](https://neoforged.net)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+
+[What it is](#what-it-is) · [Install](#install) · [Stack limit](#stack-limit) · [Count display](#count-display) · [Crafting and containers](#crafting-and-containers) · [Slot compatibility](#slot-compatibility) · [Configuration](#configuration) · [FAQ](#faq) · [Compatibility](#compatibility) · [Development](#development) · [Changelog](#changelog)
 
 </div>
 
@@ -20,156 +23,194 @@ Chinese version: [README.md](./README.md)
 
 ## What it is
 
-Vanilla caps stacks in three places, and changing only one of them does not work:
+Vanilla caps stacks in several places, and changing only one of them does nothing. This mod takes over all of them:
 
-- **Item cap**: the `max_stack_size` component defaults to 64.
-- **Save and network**: `ItemStack.CODEC` only accepts a count of 1-99, and `FriendlyByteBuf` writes the count with the same bound, so a raised cap would fail to save or sync.
-- **Container cap**: `Container.getMaxStackSize()` returns 99, which every container that does not override it (crafting grids, chests, backpacks) inherits.
-- **Crafting lag**: a shift-click on the result crafts one item per iteration, so a 32768-item grid runs tens of thousands of iterations in one tick; the mod crafts the whole batch at once.
+- **Item limit**: the `max_stack_size` data component defaults to 64.
+- **Saved data**: `ItemStack.CODEC` only accepts counts of 1–99, so larger stacks are rejected when saving.
+- **Network**: container packets write the count as a single byte, so 32768 comes back as 0.
+- **Containers and slots**: `Container.getMaxStackSize()` returns 99 by default, and chests, backpacks and crafting grids all inherit it.
+- **Crafting**: shift-clicking the result crafts one item per round in vanilla, so a grid holding tens of thousands of items runs tens of thousands of rounds inside a single tick.
 
-This mod raises all three to a configurable value (default 32768), and replaces the stack counter in slots with an abbreviated number plus an exact count in the tooltip, because the vanilla counter overflows a 16-pixel slot at four digits.
+The limit defaults to 32,768 (configurable 64–1,000,000). Small stacks scale proportionally (16 → 8,192); stackable-by-1 items and items with durability are left alone.
 
 ## Install
 
 | File | Required | Notes |
 |---|---|---|
-| `SuperStack-1.21.1-21.1-1.0.5.jar` | yes | The mod, single jar |
-| Minecraft 1.21.1 + NeoForge 21.1+ | yes | Requires Java 21 |
+| `SuperStack-<game version>-<version>.jar` | Yes | Download the matching build from Releases |
+| Minecraft 1.21.1 + NeoForge 21.1+ | Yes | Needs Java 21 |
 
-- Mekanism, Applied Energistics 2 and Sophisticated Core / Storage / Backpacks are **optional**: their slot patches only load when the mod is present, otherwise a single log line is written.
-- Install on both client and server, or the two sides disagree about the stack limit.
+- Install on both client and server. With only one side, the other still uses 64 and rejects the overflow.
+- Mekanism, Applied Energistics 2, Sophisticated, and Iron Furnaces are optional: their patches only load when the mod is present, otherwise a single log line is written.
 
 ## Stack limit
 
-`maxStackSize` sets the item cap, default 32768 (range 64-1,000,000).
-
-- Items with durability (tools, armour, Meka gear) are left alone.
-- Items that only stack to 1 are left alone (`minimumStackSizeThreshold = 1`).
-- Everything else scales as `vanilla cap x maxStackSize / 64`: ender pearl 16 becomes 8192, egg 16 becomes 8192, potions stay at 1. Turning `scaleSmallStacks` off makes every item use the full cap instead.
-
-Saving and network sync are covered by the same rewrite: counts stored inside item NBT (for example the nine slots of an upgrade item) use an int in NBT and a VarInt on the wire, so a stack of 32768 survives a save and reload as 32768.
-
-## Number display
-
-The vanilla counter is only taken over above 99:
-
-| Count | Shown in the slot |
+| Vanilla limit | With default settings |
 |---|---|
-| 99 or less | vanilla |
-| 100 - 9,999 | exact with separators, `1,234` |
-| 10,000 - 999,999 | `10.0k`, `19.9k`, `123k`, `999k` |
-| 1,000,000 and up | `1.00m`, `2.50m` |
+| 64 | 32,768 |
+| 16 | 8,192 |
+| 8 | 4,096 |
+| 1 | 1 (unchanged) |
 
-Units are truncated, never rounded up, so the display never claims more than the real count. The text is scaled to fit the 16-pixel slot, and the tooltip always shows the exact number.
+The multiplier is `maxStackSize / 64`, i.e. ×512 by default. Rules:
 
-## Config
+- Items with durability (tools, armor, Meka gear) are untouched.
+- Items whose vanilla limit is at or below `minimumStackSizeThreshold` (1 by default) are untouched.
+- With `scaleSmallStacks` disabled, every item uses `maxStackSize`.
 
-`config/superstack-common.toml`, restart required.
+Saving and network sync are rewritten as well: counts embedded in items (for example the nine slots carried by an upgrade) are stored as ints and synced as VarInts, so a stack of 32,768 survives a save/load round trip.
 
-| Option | Default | Range | Purpose |
-|---|---|---|---|
-| `maxStackSize` | 32768 | 64-1,000,000 | Item stack cap |
-| `scaleSmallStacks` | true | - | Scale small stacks by their vanilla ratio (16 becomes 8192) |
-| `minimumStackSizeThreshold` | 1 | 0-64 | Skip items whose vanilla cap is at or below this |
-| `countDisplay` | COMPACT | COMPACT / EXACT | Slot counter style |
-| `abbreviateFrom` | 10000 | 1,000-1,000,000 | Where k / m suffixes start |
-| `tooltipExactCount` | true | - | Show the exact count in the tooltip |
-| `raiseModdedSlotLimits` | true | - | Also raise other mods' item slot limits |
+## Count display
 
-## Slots in other mods
+The mod only takes over slot rendering when the count exceeds 99, and the tooltip always shows the exact number:
 
-Vanilla containers (chests, backpacks, crafting grids, hoppers) follow the mod. Custom slots fall into two groups: those extending vanilla `Slot` / `Container` follow automatically, while `ItemStackHandler` / `ComponentItemHandler` implementations are raised by `raiseModdedSlotLimits` (only ever upwards).
+| Count | Slot rendering |
+|---|---|
+| ≤ 99 | vanilla |
+| 100 – 9,999 | exact with thousands separators, e.g. `1,234` |
+| 10,000 – 999,999 | `10.0k`, `123k`, `999k` |
+| ≥ 1,000,000 | `1.00m`, `2.50m` |
 
-| Mod | Patch site | What it fixes |
+Abbreviations are truncated, never rounded up. The text is scaled to fit the 16-pixel slot and anchored to its bottom-right corner.
+
+The tooltip reads "current / limit", e.g. `Count: 12,345 / 32,768`. Inside Sophisticated screens both the overlay and the tooltip line defer to Sophisticated's own rendering, so the numbers never double up.
+
+## Crafting and containers
+
+### Bulk crafting
+
+Shift-clicking the crafting result first computes how many crafts the scarcest grid stack allows and how many the inventory can hold, takes the smaller number, then consumes the ingredients once and distributes the output once:
+
+- Works for the 3×3 crafting table and the 2×2 inventory grid.
+- Recipes with remaining items (milk buckets, potions) are batched too: buckets and bottles are placed back into the grid after the batch.
+- No auto-refill: the grid stops when it runs out, exactly like vanilla.
+- Vanilla crafting screens only. Sophisticated and Applied Energistics 2 crafting screens keep their own logic.
+
+### Container limits
+
+Chests, hoppers, furnaces, double chests and randomizable containers all follow the configured limit instead of stopping at 64 / 99.
+
+### Breaking containers
+
+Any stack above 128 drops as **one** item entity. Otherwise vanilla splits it into roughly count/20 entities — a 32,768 stack becomes about 1,600 drops, which can flood the server with entities and cause stalls or a hard lock-up when a full chest is broken.
+
+## Slot compatibility
+
+Vanilla containers follow automatically. For other mods there are two cases: slots extending `Slot` / `Container` simply follow, while mods implementing their own inventory interface are raised through `raiseModdedSlotLimits` (raise only, never lower).
+
+| Mod | Version | What is fixed |
 |---|---|---|
-| Mekanism | `BasicInventorySlot#getLimit` | Machine and GUI slots hard-coded to 99 |
-| Applied Energistics 2 | `AppEngInternalInventory#getSlotLimit`, `InternalInventoryItemHandler`, `AppEngSlot` | Network inventory and terminal slots stuck at 64 / 99 |
-| Applied Energistics 2 (crafting terminals) | `PlayerInternalInventory` / `CarriedItemInventory` gain `getSlotLimit` | Crafted output split into 99s when moved to the inventory or cursor |
-| Sophisticated Core / Storage / Backpacks | `InventoryHandler#getSlotLimit`, `StatefulComponentItemHandler#getSlotLimit` | Storage slots stuck at 64 and the crafting upgrade's 9-slot grid stuck at 99 |
+| Mekanism | 10.7.19.x | Machine and GUI slots hardcode 99; they now follow the config |
+| Applied Energistics 2 | 19.2.x | Terminal slots stop at 64 and `InternalInventory` defaults to 99; crafted output is no longer split into stacks of 99 when moved to the inventory or cursor |
+| Sophisticated Core / Storage / Backpacks | 1.5.x / 1.6.x / 3.26.x | The crafting upgrade's 9 slots stop at 99; container slot limits and screen rendering are managed by Sophisticated itself |
+| Iron Furnaces | 4.3.x | Output slot hardcodes 64; it now follows the config |
 
-All of these live in a separate `superstack.compat.mixins.json` with `required: false`: if a target class is missing, one log line is written and startup continues.
+The patches live in a separate `superstack.compat.mixins.json` with `required: false`: when a target class is missing, only a log line is written and startup continues.
 
-## Sorting mods
+## Configuration
 
-This mod never moves items; it only keeps the limits consistent. When they disagree, a sorting pass that stages stacks in a 99-capped handler truncates them.
+The file is `config/superstack-common.toml`; restart after editing.
 
-Measured with `maxStackSize = 10000`, 27 slots, Sophisticated Backpacks' "sort backpack":
-
-```
-raiseModdedSlotLimits = false    270000 -> 2673        lost 267327
-raiseModdedSlotLimits = true     270000 -> 270000      nothing lost
-```
-
-| Sorting mod | Result |
-|---|---|
-| Inventory Sorter Next | Unaffected; it reads `ItemStack.getMaxStackSize()` and leaves what does not fit |
-| Sophisticated sorting | Unaffected by default; it guards against exceeding the item cap |
+| Option | Default | Range | Meaning |
+|---|---|---|---|
+| `maxStackSize` | 32768 | 64–1,000,000 | Item stack limit |
+| `scaleSmallStacks` | true | — | Scale small stacks (16 → 8,192); disable to use the limit for everything |
+| `minimumStackSizeThreshold` | 1 | 0–64 | Items at or below this vanilla limit are not raised |
+| `countDisplay` | COMPACT | COMPACT / EXACT | Slot count rendering style |
+| `abbreviateFrom` | 10000 | 1,000–1,000,000 | Where abbreviations start |
+| `tooltipExactCount` | true | — | Show the exact count in tooltips |
+| `raiseModdedSlotLimits` | true | — | Raise slot limits of other mods |
 
 ## FAQ
 
-- **What happens if I uninstall it?** Stacks above the vanilla cap are rejected when the world loads and logged as `Tried to load invalid item`; those items are gone. Split large stacks back to 64 first.
-- **Server only, client without the mod**: the client still shows and moves 64-sized stacks, and the server refuses the rest, which looks like "clicking does nothing". Install on both sides.
-- **No counter in Sophisticated screens**: those screens draw their own abbreviated count, so this mod steps aside to avoid overlapping text.
-- **Creative menu looks odd**: entries are grouped by component value, so a raised cap still produces one entry per item, which is expected.
+**What happens if I uninstall it?**
+Stacks above the vanilla limit are rejected when loading, the log records `Tried to load invalid item`, and those items are lost. Split big stacks back to 64 before removing the mod.
+
+**Server has it, client does not?**
+The client still shows and works with 64, and the server rejects the overflow — it looks like "clicking does nothing". Install on both sides.
+
+**Why is a stack 8,192 instead of 32,768?**
+Items with a vanilla limit of 16 are scaled proportionally. Disable `scaleSmallStacks` to use the full limit everywhere.
+
+**Why is there no SuperStack overlay in Sophisticated screens?**
+Sophisticated draws its own abbreviated counts there, so the mod steps aside.
+
+**Crafting is still slow?**
+Only vanilla crafting screens are batched. Sophisticated and Applied Energistics 2 keep their own per-item loops, which this mod does not change.
+
+**Anything odd in the creative menu?**
+Creative tabs group by component value, so each item still has a single entry — expected.
 
 ## Compatibility
 
-- KubeJS coexistence works: its `remove_slot_limit` / `default_max_stack_size` pass through and do not push the cap back down.
-- With Mekanism, Applied Energistics 2 and Sophisticated installed, slot limits follow this mod; breaking those containers no longer scatters 64-sized piles (since 21.1-1.0.1).
-- Test in a new world or a backup: this mod changes saved data by design.
+| Scenario | Behaviour |
+|---|---|
+| Vanilla containers / hoppers / furnaces | Follow the configured limit |
+| KubeJS | Its `remove_slot_limit` passes through and does not lower the limit |
+| Inventory sorting mods | Read `ItemStack.getMaxStackSize()` and leave the overflow in place |
+| Sophisticated "sort inventory" | Has its own "do not exceed the item limit" guard; measured with `maxStackSize = 10000` and 27 slots: 270000 → 2673 with `raiseModdedSlotLimits` off, 270000 → 270000 with it on |
+| Functional Storage | Drawer capacity scales with the item limit — expected |
+| Immersive Engineering / EnderIO / Create | These ship their own inventory interfaces with hardcoded limits; not changed here |
 
-## For developers
+The mod changes saved data, so back up or test in a throwaway world first.
+
+## Development
 
 ### Implementation
 
-| Site | Behaviour |
+| Place | What it does |
 |---|---|
-| `ExtraCodecsMixin` | Replaces the upper bound of `ExtraCodecs.intRange(1, 99)`, covering both the `max_stack_size` component and `ItemStack.CODEC`'s count |
-| `ModBusEvents` | Writes the new `max_stack_size` for every item in `ModifyDefaultComponentsEvent`, skipping durability items and stack-1 items |
-| `ContainerMixin` / `SlotMixin` | Replaces a returned 99 with the configured cap, other values pass through |
-| `GuiGraphicsMixin` / `CountFormat` | Takes over the counter above 99: abbreviation, exact form, scaling |
-| `ClientEvents` | Adds the exact count line to tooltips |
-| `ItemStackHandlerMixin` / `ComponentItemHandlerMixin` | Gated by `raiseModdedSlotLimits`, only raise |
-| `mixin/compat/*` | Six per-mod slot patches in a separate, non-required config |
+| `ExtraCodecsMixin` | Raises the upper bound of `ExtraCodecs.intRange(1, 99)` to the config, covering both the `max_stack_size` component and `ItemStack.CODEC` |
+| `ModBusEvents` | `ModifyDefaultComponentsEvent` writes the new `max_stack_size` for every item, skipping durable and stackable-by-1 items |
+| `ContainerMixin` / `SlotMixin` | Replaces a returned 99 with the configured limit, leaving other values alone |
+| `ItemStackHandlerMixin` / `ComponentItemHandlerMixin` | Slot limits under `raiseModdedSlotLimits`, raise only |
+| `CraftingMenuMixin` / `InventoryMenuMixin` + `SuperStackBulkCraft` | Bulk crafting: count crafts, consume once, distribute once |
+| `BulkCraftMath` | Pure arithmetic: availability, crafts, output, space, chunking, conservation check — with JUnit tests |
+| `ContainersDropStackMixin` | Drops big stacks as a single entity |
+| `GuiGraphicsMixin` / `CountFormat` | Abbreviated, scaled count rendering |
+| `ClientEvents` | Adds the "current / limit" tooltip line |
+| `mixin/compat/*` | Per-mod slot patches in a separate, optional config |
 
-### Build
+### Building
 
-JDK 21, `gradlew build`, output in `build/libs/`.
+Requires JDK 21:
+
+```
+gradlew build     # jar in build/libs/SuperStack-1.21.1-21.1-*.jar
+gradlew test      # 8 unit tests for BulkCraftMath
+```
 
 ## Changelog
 
 ### 21.1-1.0.5
 
-- Shift-clicking the crafting result now crafts everything that fits, in one go, and no longer freezes the game. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round; with tens of thousands of items that is tens of thousands of iterations in a single tick. The mod computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once, so the cost depends on the number of slots, not on the stack size.
-- Nine stacks of iron (32768 x 9) now turn into 32768 iron blocks on a single click without timing out the server.
-- Recipes with remaining items (milk buckets and the like) are batched too: ingredients are consumed once and the container items are put back multiplied by the number of crafts.
-- Applies to the vanilla crafting table and the 2x2 grid only; mods with their own crafting screens (Sophisticated, AE2) keep their own logic.
-- The tooltip now shows the current count out of the limit, for example `Count: 12,345 / 32,768`.
-- Slot numbers are scaled from the bottom-right corner of the slot, so long numbers no longer drift upwards.
-- Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64.
-- Sophisticated Core storage slots (backpacks, chests, barrels) follow the configured limit; they were previously pinned at 64, so a whole stack of 32768 got split into many 64s.
-- Added `pack.mcmeta`, so the resource and data pack loaders no longer report missing metadata.
-
-- Breaking a vanilla container now drops each oversized stack as a single item entity instead of scattering it into about a thousand items. A full chest used to spawn tens of thousands of item entities and stall the server.
+- Shift-clicking the crafting result now crafts everything at once: the mod computes how many crafts the ingredients allow and how many the inventory can hold, takes the smaller value, then consumes and distributes in one pass. Vanilla re-checks the recipe, consumes items and inserts output every round, so tens of thousands of items froze the game or timed out on servers.
+- Nine stacks of iron (32,768 × 9) now turns into 32,768 iron blocks in a single click without a server tick timeout.
+- Recipes with remaining items (milk buckets and similar) are batched too: buckets and bottles are placed back after the batch.
+- The tooltip count is now "current / limit", e.g. `Count: 12,345 / 32,768`.
+- Slot numbers are anchored to the slot's bottom-right corner and no longer drift upwards.
+- Iron Furnaces output limit follows the config instead of stopping at 64.
+- Added the missing `pack.mcmeta`.
+- Breaking chests, barrels, furnaces and hoppers drops a big stack as a single entity; before, a 32,768 stack became roughly 1,600 item entities.
 
 <details>
 <summary><b>21.1-1.0.4</b></summary>
 
-- The AE2 slot patch now adds `getSlotLimit` directly. 1.0.3 targeted classes that only implement the interface without declaring the method, which crashed startup when AE2 was installed.
+- The Applied Energistics 2 patch now adds `getSlotLimit` directly. 1.0.3 injected into classes that only implemented the interface without declaring the method, which crashed on startup when AE2 was installed.
 
 </details>
 
 <details>
 <summary><b>21.1-1.0.3</b></summary>
 
-- Crafted output in AE2 crafting terminals (including the wireless and the combined terminal) is no longer split into 99s when written to the inventory or cursor.
+- In AE2 crafting terminals (including the wireless and comprehensive terminals), crafted output is no longer split into stacks of 99 by `InternalInventory`'s default limit when moved into the inventory or cursor.
 
 </details>
 
 <details>
 <summary><b>21.1-1.0.2</b></summary>
 
-- The 9-slot crafting grid of the Sophisticated crafting upgrade no longer caps at 99: the patch moved from the slot to `StatefulComponentItemHandler#getSlotLimit`.
+- The 9-slot crafting grid of the Sophisticated crafting upgrade no longer caps at 99; the patch moved from the container slot to `StatefulComponentItemHandler#getSlotLimit`.
 
 </details>
 
@@ -177,23 +218,25 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 <summary><b>21.1-1.0.1</b></summary>
 
 - Container and slot limits follow the config instead of stopping at 99.
-- Mekanism, AE2 and Sophisticated slots no longer stop at 64 / 99.
-- Sophisticated screens no longer get this mod's counter drawn on top.
-- Breaking those containers no longer drops 64-sized piles.
-- Patches are skipped when the matching mod is absent.
+- Mekanism and Applied Energistics 2 slots no longer stop at 64 / 99.
+- Sophisticated screens no longer show this mod's count overlay.
+- Breaking these containers no longer splits the contents into stacks of 64.
+- Patches are skipped automatically when the mod is absent.
 
 </details>
 
 <details>
 <summary><b>21.1-1.0.0</b></summary>
 
-- Configurable item stack cap (64-1,000,000, default 32768), small stacks scaled by ratio with a threshold to skip.
-- Number display: exact between 100 and 9,999, abbreviated above, exact count in the tooltip.
+- Configurable stack limit (64–1,000,000, default 32,768) with proportional scaling and a threshold for small stacks.
+- Count display: exact up to 9,999, abbreviated from 10,000, exact value in tooltips.
 
 </details>
 
-## License and feedback
+## License and credits
 
-[MIT](./LICENSE) · by zaixiayesheng · [issues](https://github.com/zaixiayesheng/SuperStack/issues)
+[MIT](./LICENSE) © 2026 zaixiayesheng. The logo is drawn for this project.
 
-Please include your Minecraft and loader version, the mod version, `logs/latest.log`, and the container or sorting flow involved.
+## Feedback
+
+Report issues on [Issues](https://github.com/zaixiayesheng/SuperStack/issues). Please include the Minecraft and NeoForge versions, the mod version, `logs/latest.log`, and the container or crafting flow involved.
