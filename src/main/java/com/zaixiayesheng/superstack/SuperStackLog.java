@@ -108,6 +108,31 @@ public final class SuperStackLog {
         return LOGGER.isDebugEnabled();
     }
 
+    /**
+     * 排查兼容补丁时用：提前把目标类加载出来，让 Mixin 当场注入，注入失败会直接报在日志里。
+     * 只有带 {@code -Dsuperstack.debug.forcecompat} 启动时才跑。
+     */
+    public static void probeCompatTargets() {
+        String[] targets = {
+                "net.p3pp3rf1y.sophisticatedcore.util.InventorySorter",
+                "net.p3pp3rf1y.sophisticatedcore.inventory.StatefulComponentItemHandler",
+                "appeng.util.inv.AppEngInternalInventory",
+                "appeng.menu.slot.AppEngSlot",
+                "appeng.util.inv.PlayerInternalInventory",
+                "appeng.util.inv.CarriedItemInventory",
+                "mekanism.common.inventory.slot.BasicInventorySlot",
+                "ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase"
+        };
+        for (String target : targets) {
+            try {
+                Class.forName(target);
+                info("兼容目标已加载：" + target);
+            } catch (Throwable t) {
+                debug("兼容目标不存在：" + target);
+            }
+        }
+    }
+
     /** 出异常时用，带上堆栈。 */
     public static void warn(String message, Throwable cause) {
         LOGGER.warn("{}{}", PREFIX, message, cause);

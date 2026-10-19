@@ -21,6 +21,10 @@ public class SuperStack {
         // 记下构造时刻，配置加载完报「多久之后上限开始生效」
         SuperStackLog.markConstructed();
 
+        if (System.getProperty("superstack.debug.forcecompat") != null) {
+            SuperStackLog.probeCompatTargets();
+        }
+
         modContainer.registerConfig(ModConfig.Type.COMMON, SuperStackConfig.SPEC);
         modEventBus.addListener(SuperStackConfig::onConfigLoad);
         modEventBus.addListener(ModBusEvents::onModifyDefaultComponents);

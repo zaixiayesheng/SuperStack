@@ -186,6 +186,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ### 21.1-1.0.6
 
+- Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
 - Slot limits exposed to supported mods now come from `compatStackLimit` (1,000,000 by default), so third-party code cannot overflow or allocate by the raw stack size.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
 - Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.

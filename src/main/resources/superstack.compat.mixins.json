@@ -11,7 +11,8 @@
     "Ae2SlotMixin",
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
-    "SophisticatedStatefulComponentItemHandlerMixin"
+    "SophisticatedStatefulComponentItemHandlerMixin",
+    "SophisticatedInventorySorterMixin"
   ],
   "injectors": {
     "defaultRequire": 1
