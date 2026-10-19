@@ -30,6 +30,10 @@ public final class SuperStackConfig {
             .comment("物品的堆叠上限。原版是 64，默认 32768，上限 2147483647。改完需要重启游戏。",
                     "The new stack size limit for items. Vanilla is 64, default 32768, upper bound Integer.MAX_VALUE (2147483647). Restart required after changing.")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, Integer.MAX_VALUE);
+    private static final ForgeConfigSpec.IntValue COMPAT_STACK_LIMIT = BUILDER
+            .comment("联动模组（通用机械、应用能源、精妙、更多熔炉）看到的槽位上限。默认 1000000，比堆叠上限低，避免第三方把槽位上限当数组长度或做乘法时溢出。",
+                    "Slot limit exposed to supported mods. Deliberately lower than the stack size; raise it only if you know those mods handle huge values.")
+            .defineInRange("compatStackLimit", 1_000_000, 64, Integer.MAX_VALUE);
 
     private static final ForgeConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
             .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",
@@ -67,6 +71,7 @@ public final class SuperStackConfig {
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
+    private static volatile int compatStackLimit = 1_000_000;
     private static volatile boolean scaleSmallStacks = true;
     private static volatile int minimumStackSizeThreshold = 1;
     private static volatile CountDisplay countDisplay = CountDisplay.COMPACT;
@@ -79,6 +84,10 @@ public final class SuperStackConfig {
 
     public static int maxStackSize() {
         return maxStackSize;
+    }
+
+    public static int compatStackLimit() {
+        return compatStackLimit;
     }
 
     public static boolean scaleSmallStacks() {
@@ -121,6 +130,7 @@ public final class SuperStackConfig {
 
         try {
             maxStackSize = MAX_STACK_SIZE.get();
+        compatStackLimit = COMPAT_STACK_LIMIT.get();
             scaleSmallStacks = SCALE_SMALL_STACKS.get();
             minimumStackSizeThreshold = MIN_THRESHOLD.get();
             countDisplay = COUNT_DISPLAY.get();
@@ -221,6 +231,14 @@ public final class SuperStackConfig {
             return original;
         }
         return original == VANILLA_MAX_STACK_SIZE || original == 99 ? maxStackSize : original;
+    }
+
+    /** 联动模组用的版本：把写死的 64 / 99 换成 compatStackLimit。 */
+    public static int raiseCompatLimit(int original) {
+        if (!raiseModdedSlotLimits) {
+            return original;
+        }
+        return original == VANILLA_MAX_STACK_SIZE || original == 99 ? compatStackLimit : original;
     }
 
     /** 其它模组的物品槽上限（可选，默认不动，只升不降）。 */
