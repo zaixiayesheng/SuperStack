@@ -7,12 +7,14 @@
   "mixins": [
     "SlotMixin",
     "PlayerInventoryMixin",
+    "SimpleContainerMixin",
     "ItemMixin",
     "ItemStackMixin",
     "ItemStackHandlerMixin",
     "FriendlyByteBufMixin",
     "CraftingMenuMixin",
-    "InventoryMenuMixin"
+    "InventoryMenuMixin",
+    "CreativeSlotLimitMixin"
   ],
   "client": [
     "GuiGraphicsMixin"

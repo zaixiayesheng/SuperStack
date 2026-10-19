@@ -79,6 +79,28 @@ public final class SuperStackLog {
      */
     static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(SuperStackLog::logAppliedLimits);
+
+    }
+
+    /**
+     * 网络编码自检：把一个 32768 的堆叠按 {@code writeItem} 写出去、再用 {@code readItem} 读回来。
+     *
+     * <p>1.20.1 原版这里用 byte 写数量，32768 会被截成 0；本模组把两端都换成 VarInt。
+     * 如果某天两条补丁只生效了一条，就会表现为「客户端一整叠显示成空格」，
+     * 而服务端数据还在——所以每次启动各报一行，读回的数量对不上就很明显了。
+     */
+    private static void logCodecRoundTrip() {
+        try {
+            io.netty.buffer.ByteBuf raw = io.netty.buffer.Unpooled.buffer();
+            net.minecraft.network.FriendlyByteBuf buf = new net.minecraft.network.FriendlyByteBuf(raw);
+            net.minecraft.world.item.ItemStack written =
+                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE, 32768);
+            buf.writeItem(written);
+            net.minecraft.world.item.ItemStack readBack = buf.readItem();
+            LOGGER.info("{}编码自检：写入 {}，读回 {}", PREFIX, written.getCount(), readBack.getCount());
+        } catch (Throwable t) {
+            LOGGER.warn("{}编码自检失败", PREFIX, t);
+        }
     }
 
     private static void logAppliedLimits() {
@@ -187,5 +209,13 @@ public final class SuperStackLog {
             // 版本号只是日志里的装饰，取不到不能影响加载
             return "unknown";
         }
+    }
+
+    /** TEMPORARY diagnostic helper: "minecraft:stone x32768". */
+    public static String describe(net.minecraft.world.item.ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return "empty";
+        }
+        return net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem()) + " x" + stack.getCount();
     }
 }

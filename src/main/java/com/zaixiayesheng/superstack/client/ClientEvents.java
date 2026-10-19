@@ -16,8 +16,11 @@ import net.minecraftforge.fml.common.Mod;
  * Client side: the tooltip shows "current / limit".
  *
  * <p>Sophisticated's own screens and tooltips already show the count, so nothing is added there.
+ *
+ * <p>{@code bus = FORGE} is required on 1.20.1: the default bus is the mod bus, and
+ * {@link ItemTooltipEvent} never fires there.
  */
-@Mod.EventBusSubscriber(modid = SuperStack.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = SuperStack.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class ClientEvents {
     private ClientEvents() {
     }
