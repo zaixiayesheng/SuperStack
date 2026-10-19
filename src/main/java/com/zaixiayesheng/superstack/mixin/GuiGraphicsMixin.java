@@ -59,11 +59,8 @@ public abstract class GuiGraphicsMixin {
                                      boolean dropShadow, Operation<Integer> original,
                                      Font itemFont, ItemStack stack, int itemX, int itemY,
                                      @Nullable String customText) {
-        // 精妙系列的界面在数量超过 99 时会自己画缩写数量，再画一遍就叠字了
-        if (superstack$isSophisticatedScreen()) {
-            return original.call(graphics, font, text, x, y, color, dropShadow);
-        }
-
+        // 精妙界面里，它自己会给格子传入 customText（数量超过 99 时传空串并自己画缩写），
+        // 那种情况交给它画；但拖动/悬停在鼠标上的堆叠没有 customText，仍需我们缩放缩写。
         int count = stack.getCount();
         if (count <= 99 || customText != null || text == null) {
             return original.call(graphics, font, text, x, y, color, dropShadow);
@@ -81,16 +78,20 @@ public abstract class GuiGraphicsMixin {
         }
 
         float scale = Math.min(1.0F, SLOT_WIDTH / width);
-        // 缩小之后字变矮了，往下补一点，让它还是贴着格子底部
-        float top = y + font.lineHeight * 0.5F * (1.0F - scale);
+        // 原版把数字画在格子右下角。这里绕「文字的右下角」缩放：缩小时数字向上、向左收，
+        // 底边和右边保持不动，所以看起来还贴在格子底部（早先乘/除 scale 的写法会让数字上浮）。
+        int right = x + font.width(text);
+        int bottom = y + font.lineHeight;
 
         PoseStack pose = graphics.pose();
         pose.pushPose();
         if (scale < 1.0F) {
+            pose.translate(right, bottom, 0.0F);
             pose.scale(scale, scale, 1.0F);
+            pose.translate(-right, -bottom, 0.0F);
         }
-        int drawX = Math.round((itemX + RIGHT_OFFSET) / scale - width);
-        int drawY = Math.round(top / scale);
+        int drawX = right - width;
+        int drawY = y;
 
         if (!superstack$countLogged && SuperStackLog.isDebugEnabled()) {
             superstack$countLogged = true;

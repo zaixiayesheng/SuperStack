@@ -140,10 +140,13 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 
 ### 1.0.5
 
-- Shift-clicking the crafting result now crafts everything that fits, in one go, and no longer freezes the game. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round; with tens of thousands of items that is tens of thousands of iterations in a single tick. The mod now computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once, so the cost depends on the number of slots, not on the stack size.
+- Shift-clicking the crafting result now crafts everything that fits, in one go, and no longer freezes the game. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round; with tens of thousands of items that is tens of thousands of iterations in a single tick. The mod computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once, so the cost depends on the number of slots, not on the stack size.
 - Nine stacks of iron (32768 x 9) now turn into 32768 iron blocks on a single click without timing out the server.
 - Recipes with remaining items (milk buckets and the like) are batched too: ingredients are consumed once and the container items are put back multiplied by the number of crafts.
-- Applies to the vanilla crafting table and the 2x2 grid; mods with their own crafting screens (Sophisticated, AE2) are handled separately.
+- Applies to the vanilla crafting table and the 2x2 grid only; mods with their own crafting screens (Sophisticated, AE2) keep their own logic.
+- The tooltip now shows the current count out of the limit, for example `Count: 12,345 / 32,768`.
+- Slot numbers are scaled from the bottom-right corner of the slot, so long numbers no longer drift upwards.
+- Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64.
 
 <details>
 <summary><b>1.0.4</b></summary>
