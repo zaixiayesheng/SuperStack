@@ -76,15 +76,28 @@ public final class SuperStackBulkCraft {
             if (rem.isEmpty()) {
                 continue;
             }
-            ItemStack gave = rem.copyWithCount(rem.getCount() * crafts);
-            ItemStack current = craftSlots.getItem(i);
-            if (current.isEmpty()) {
-                craftSlots.setItem(i, gave);
-            } else if (ItemStack.isSameItemSameTags(current, gave)) {
-                gave.grow(current.getCount());
-                craftSlots.setItem(i, gave);
-            } else if (!player.getInventory().add(gave)) {
-                player.drop(gave, false);
+            long totalGave = (long) rem.getCount() * crafts;
+            while (totalGave > 0) {
+                int chunk = BulkCraftMath.nextChunk(totalGave, rem.getMaxStackSize());
+                ItemStack gave = rem.copyWithCount(chunk);
+                ItemStack current = craftSlots.getItem(i);
+                if (current.isEmpty()) {
+                    craftSlots.setItem(i, gave);
+                } else if (ItemStack.isSameItemSameTags(current, gave) && current.getCount() < current.getMaxStackSize()) {
+                    int room = current.getMaxStackSize() - current.getCount();
+                    if (room >= chunk) {
+                        current.grow(chunk);
+                    } else {
+                        current.grow(room);
+                        gave.shrink(room);
+                        if (!player.getInventory().add(gave)) {
+                            player.drop(gave, false);
+                        }
+                    }
+                } else if (!player.getInventory().add(gave)) {
+                    player.drop(gave, false);
+                }
+                totalGave -= chunk;
             }
         }
 
@@ -101,7 +114,8 @@ public final class SuperStackBulkCraft {
             remainingOutput -= chunk;
         }
 
-        result.onCraftedBy(player.level(), player, crafts * perCraft);
+        int producedInt = (int) Math.min((long) crafts * perCraft, Integer.MAX_VALUE);
+        result.onCraftedBy(player.level(), player, producedInt);
         player.awardStat(Stats.ITEM_CRAFTED.get(result.getItem()), crafts);
         ForgeEventFactory.firePlayerCraftingEvent(player, result, craftSlots);
 

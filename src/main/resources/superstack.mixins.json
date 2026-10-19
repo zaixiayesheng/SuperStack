@@ -19,7 +19,8 @@
     "HopperBlockEntityMixin",
     "RandomizableContainerBlockEntityMixin",
     "ContainersDropStackMixin",
-    "CreativeSlotLimitMixin"
+    "CreativeSlotLimitMixin",
+    "ItemEntityMergeGuardMixin"
   ],
   "client": [
     "GuiGraphicsMixin"
