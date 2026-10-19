@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.zaixiayesheng.superstack.CountFormat;
 import com.zaixiayesheng.superstack.SuperStackConfig;
 import com.zaixiayesheng.superstack.SuperStackLog;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -36,10 +35,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(GuiGraphics.class)
 public abstract class GuiGraphicsMixin {
-    /** 格子宽 16 像素，文字最多占这么宽。 */
+    /** Slot width in pixels; the text may take at most this much. */
     private static final float SLOT_WIDTH = 16.0F;
-    /** 原版右对齐的落点：x + 19 - 2。 */
-    private static final float RIGHT_OFFSET = 17.0F;
 
     /** DEBUG 下只报第一次接管，避免每帧刷屏。 */
     @Unique
@@ -56,11 +53,8 @@ public abstract class GuiGraphicsMixin {
                                      boolean dropShadow,
                                      Font itemFont, ItemStack stack, int itemX, int itemY,
                                      @Nullable String customText) {
-        // 精妙系列的界面在数量超过 99 时会自己画缩写数量，再画一遍就叠字了
-        if (superstack$isSophisticatedScreen()) {
-            return graphics.drawString(font, text, x, y, color, dropShadow);
-        }
-
+        // Sophisticated passes its own customText when its slot shows a count; leave that to it.
+        // Stacks dragged around by the mouse have no customText, so they still get our abbreviation.
         int count = stack.getCount();
         if (count <= 99 || customText != null || text == null) {
             return graphics.drawString(font, text, x, y, color, dropShadow);
@@ -78,16 +72,21 @@ public abstract class GuiGraphicsMixin {
         }
 
         float scale = Math.min(1.0F, SLOT_WIDTH / width);
-        // 缩小之后字变矮了，往下补一点，让它还是贴着格子底部
-        float top = y + font.lineHeight * 0.5F * (1.0F - scale);
+        // Vanilla draws the count at the bottom-right of the slot. Scaling around the text's own
+        // bottom-right corner keeps the right edge and the baseline in place, so a shrunk number
+        // still sits on the slot bottom instead of floating upwards.
+        int right = x + font.width(text);
+        int bottom = y + font.lineHeight;
 
         PoseStack pose = graphics.pose();
         pose.pushPose();
         if (scale < 1.0F) {
+            pose.translate(right, bottom, 0.0F);
             pose.scale(scale, scale, 1.0F);
+            pose.translate(-right, -bottom, 0.0F);
         }
-        int drawX = Math.round((itemX + RIGHT_OFFSET) / scale - width);
-        int drawY = Math.round(top / scale);
+        int drawX = right - width;
+        int drawY = y;
 
         if (!superstack$countLogged && SuperStackLog.isDebugEnabled()) {
             superstack$countLogged = true;
@@ -99,15 +98,5 @@ public abstract class GuiGraphicsMixin {
         int result = graphics.drawString(font, display, drawX, drawY, color, dropShadow);
         pose.popPose();
         return result;
-    }
-
-    /** 当前界面是不是精妙（背包/存储）的 GUI。按类名判断，没装精妙时永远是 false。 */
-    @Unique
-    private static boolean superstack$isSophisticatedScreen() {
-        var screen = Minecraft.getInstance().screen;
-        if (screen == null) {
-            return false;
-        }
-        return screen.getClass().getName().startsWith("net.p3pp3rf1y.sophisticated");
     }
 }

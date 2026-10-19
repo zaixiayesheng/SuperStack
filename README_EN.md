@@ -133,6 +133,15 @@ JDK 17 and a Forge 47.4 development environment, `gradlew build`, output in `bui
 
 ## Changelog
 
+### 1.0.1
+
+- Shift-clicking the crafting result now crafts everything that fits in one go. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round, so tens of thousands of items mean tens of thousands of iterations in a single tick and a server timeout. The mod computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once.
+- Nine stacks of iron (32768 x 9) now turn into 32768 iron blocks on a single click.
+- Recipes with remaining items (milk buckets and the like) are batched too: ingredients are consumed once and the container items are put back multiplied by the number of crafts.
+- Applies to the vanilla crafting table and the 2x2 grid only; mods with their own crafting screens (Sophisticated, AE2) keep their own logic.
+- The tooltip now shows the current count out of the limit.
+- Slot numbers are scaled from the bottom-right corner of the slot.
+- Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64.
 ### 1.0.0
 
 - First Forge 1.20.1 build with feature parity to the 1.21.1 line: configurable cap (default 32768), scaled small stacks, exact and abbreviated counters.

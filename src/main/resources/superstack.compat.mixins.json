@@ -9,7 +9,7 @@
     "Ae2CarriedItemInventoryMixin",
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
-    "SophisticatedInventoryHandlerMixin"
+    "IronFurnacesFurnaceTileMixin"
   ],
   "injectors": {
     "defaultRequire": 1

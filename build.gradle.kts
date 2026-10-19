@@ -5,7 +5,7 @@ plugins {
 }
 
 val modId = "superstack"
-val modVersion = "1.0.0"
+val modVersion = "1.0.1"
 val mcVersion = "1.20.1"
 val forgeVersion = "47.4.0"
 val parchmentMappings = "2023.09.03"
@@ -100,5 +100,18 @@ tasks.jar {
         attributes(
             "MixinConfigs" to "$modId.mixins.json,$modId.compat.mixins.json"
         )
+    }
+}
+
+dependencies {
+    // Unit tests for the bulk crafting arithmetic (no game classes involved).
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "failed", "skipped")
     }
 }
