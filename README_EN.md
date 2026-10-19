@@ -189,6 +189,7 @@ Jars needed by the third-party patches live in `libs/` as `compileOnly` dependen
 
 ### 20.1-1.0.2
 
+- Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
 - Slot limits exposed to supported mods now come from `compatStackLimit` (1,000,000 by default), so third-party code cannot overflow or allocate by the raw stack size.
 - Iron Furnaces: fixed an out-of-memory crash while loading a furnace, caused by the mod using the container limit as its inventory size.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
