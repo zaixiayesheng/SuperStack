@@ -10,13 +10,15 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * that ceiling must follow the configured limit, otherwise the output slot never fills up.
  *
  * <p>Only the smelting capacity constants are touched: the 64 inside {@code smelt}/{@code factorySmelt}
- * is the "million furnace smelts 64 at a time" multiplier and must stay as is.
+ * is the "million furnace smelts 64 at a time" multiplier and must stay as is, and the two 64s in
+ * {@code tick} are the auto-IO thresholds. {@code tick} is also a static method, so a non-static
+ * callback cannot target it at all.
  */
 @Mixin(targets = "ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase", remap = false)
 public abstract class IronFurnacesFurnaceTileMixin {
 
     @ModifyConstant(
-            method = {"tick", "canSmelt", "smeltItemMult", "smeltFactoryItemMult"},
+            method = {"canSmelt", "smeltItemMult", "smeltFactoryItemMult"},
             constant = @Constant(intValue = 64),
             remap = false)
     private int superstack$raiseOutputCeiling(int original) {

@@ -141,7 +141,9 @@ JDK 17 and a Forge 47.4 development environment, `gradlew build`, output in `bui
 - Applies to the vanilla crafting table and the 2x2 grid only; mods with their own crafting screens (Sophisticated, AE2) keep their own logic.
 - The tooltip now shows the current count out of the limit.
 - Slot numbers are scaled from the bottom-right corner of the slot.
-- Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64.
+- Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64; the previous build also targeted the static `tick` method, which made the whole patch fail to inject.
+- Sophisticated Core storage slots (backpacks, chests, barrels) follow the configured limit; they were previously pinned at 64, so a whole stack of 32768 got split into many 64s.
+- Added `pack.mcmeta`, so the resource and data pack loaders no longer report missing metadata.
 ### 1.0.0
 
 - First Forge 1.20.1 build with feature parity to the 1.21.1 line: configurable cap (default 32768), scaled small stacks, exact and abbreviated counters.
