@@ -34,10 +34,32 @@ public final class SuperStackSophisticatedBulkCraft {
 
     private static final String CRAFTING_CONTAINER_PACKAGE = "net.p3pp3rf1y.sophisticatedcore.upgrades.crafting.";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("superstack");
+
+    private static void dbg(String message) {
+        LOG.info("[ss-bulk] " + message);
+    }
+
     /** Returns true when the click was fully handled and the original loop must not run. */
     public static boolean tryCraftAll(Object menu, Slot resultSlot, Player player) {
+        long started = System.nanoTime();
+        boolean handled;
+        try {
+            handled = doCraftAll(menu, resultSlot, player);
+        } catch (Throwable error) {
+            dbg("error " + error);
+            handled = false;
+        }
+        dbg("done handled=" + handled + " ms=" + ((System.nanoTime() - started) / 1_000_000.0));
+        return handled;
+    }
+
+    private static boolean doCraftAll(Object menu, Slot resultSlot, Player player) {
+        long started = System.nanoTime();
         try {
             Object container = findCraftingContainer(menu, resultSlot);
+            dbg("entry slot=" + resultSlot.getClass().getSimpleName() + " container="
+                + (container == null ? "none" : container.getClass().getSimpleName()));
             if (container == null) {
                 return false;
             }
@@ -99,6 +121,9 @@ public final class SuperStackSophisticatedBulkCraft {
                 return false;
             }
             long produced = (long) crafts * perCraft;
+            dbg("start crafts=" + crafts + " perCraft=" + perCraft + " produced=" + produced
+                + " refill=" + refill + " storage=" + (storage != null) + " preMs="
+                + ((System.nanoTime() - started) / 1_000_000.0));
 
             // consume the inputs: grid first, then storage, then the player inventory
             for (int i = 0; i < matrix.getContainerSize(); i++) {
