@@ -143,6 +143,7 @@ JDK 17 and a Forge 47.4 development environment, `gradlew build`, output in `bui
 - Slot numbers are scaled from the bottom-right corner of the slot.
 - Iron Furnaces now follows the configured limit for its output ceiling instead of staying at 64; the previous build also targeted the static `tick` method, which made the whole patch fail to inject.
 - Sophisticated Core storage slots (backpacks, chests, barrels) follow the configured limit; they were previously pinned at 64, so a whole stack of 32768 got split into many 64s.
+- The player inventory follows the configured limit as well. In 1.20.1 `Container.getMaxStackSize()` defaults to 64 and the inventory, item pickup and `/give` all use that default, so the inventory stayed at 64 per slot even after item limits were raised; this build replaces both the slot limit and the inventory's internal merge limit.
 - Added `pack.mcmeta`, so the resource and data pack loaders no longer report missing metadata.
 ### 1.0.0
 

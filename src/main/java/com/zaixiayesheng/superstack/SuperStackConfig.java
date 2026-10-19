@@ -207,9 +207,12 @@ public final class SuperStackConfig {
         }
     }
 
-    /** 原版 Container/Slot 的默认上限就是 99，只把这个值换成我们的上限。 */
+    /**
+     * 原版 {@code Container} 的默认上限：1.20.1 是 64，1.21 起是 99。两个值都换成本模组的上限，
+     * 这样玩家物品栏、箱子之类没自己重写 {@code getMaxStackSize} 的容器才会跟着放大。
+     */
     public static int raiseVanillaDefault(int original) {
-        return original == 99 ? maxStackSize : original;
+        return original == VANILLA_MAX_STACK_SIZE || original == 99 ? maxStackSize : original;
     }
 
     /** 其它模组的物品槽上限（Forge 的 ItemStackHandler 用 64 当默认值）。 */
