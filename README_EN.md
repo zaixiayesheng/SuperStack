@@ -150,7 +150,7 @@ JDK 17 and a Forge 47.4 development environment, `gradlew build`, output in `bui
 - Iron Furnaces keeps its own inventory limit (`TileEntityInventory` declares `getMaxStackSize`); that and the Forge item handler wrapper now follow the configured limit, so pipe input to modded machines is not stuck at 64.
 - Breaking a vanilla container drops each oversized stack as a single item entity instead of scattering it into thousands of items.
 - Closing the crafting table with a full inventory puts the grid back into the inventory where possible; what does not fit drops as whole stacks instead of dozens of 64-sized piles.
-- Fixed the injection targets of the Sophisticated crafting grid and Iron Furnaces patches, and added the missing `pack.mcmeta`.
+- Fixed the injection targets of the Sophisticated crafting grid and Iron Furnaces patches.
 
 ### 20.1-1.0.0
 
