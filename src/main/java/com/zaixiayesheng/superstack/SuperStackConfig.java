@@ -65,12 +65,6 @@ public final class SuperStackConfig {
                     "如果有机器因此拒收物品，再把它关掉。")
             .define("raiseModdedSlotLimits", true);
 
-    private static final ModConfigSpec.IntValue MAX_CRAFTS_PER_CLICK = BUILDER
-            .comment("兜底上限：只在配方带「剩余物品」（桶装牛奶之类）走不了批量合成时生效。",
-                    "Shift 点击合成结果默认会一次把能合的全都合完，不再受这个数字限制。",
-                    "Fallback limit for recipes that cannot be batched (container-item recipes such as milk buckets).",
-                    "Normal shift-clicking crafts everything at once and ignores this value.")
-            .defineInRange("maxCraftsPerClick", 2048, 1, 65_536);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -81,7 +75,6 @@ public final class SuperStackConfig {
     private static volatile int abbreviateFrom = 10000;
     private static volatile boolean tooltipExactCount = true;
     private static volatile boolean raiseModdedSlotLimits = true;
-    private static volatile int maxCraftsPerClick = 2048;
 
     private SuperStackConfig() {
     }
@@ -114,9 +107,6 @@ public final class SuperStackConfig {
         return raiseModdedSlotLimits;
     }
 
-    public static int maxCraftsPerClick() {
-        return maxCraftsPerClick;
-    }
 
     // ==== 下面几个方法是给混入调用的，只在"原版默认值"上动手，其余保持原样，尽量不影响别的模组 ====
 
@@ -140,7 +130,6 @@ public final class SuperStackConfig {
             abbreviateFrom = ABBREVIATE_FROM.get();
             tooltipExactCount = TOOLTIP_COUNT.get();
             raiseModdedSlotLimits = RAISE_MODDED_SLOT_LIMITS.get();
-            maxCraftsPerClick = MAX_CRAFTS_PER_CLICK.get();
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
             SuperStackLog.warn("配置尚未就绪，先使用默认值", e);
