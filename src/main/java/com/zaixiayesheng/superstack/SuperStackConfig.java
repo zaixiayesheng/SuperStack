@@ -66,11 +66,10 @@ public final class SuperStackConfig {
             .define("raiseModdedSlotLimits", true);
 
     private static final ModConfigSpec.IntValue MAX_CRAFTS_PER_CLICK = BUILDER
-            .comment("按住 Shift 点击合成结果时，一次最多合成多少次。",
-                    "原版一次只会合成到背包放不下为止，但大堆叠下一格就有三万多个，合成循环会跑上万次，",
-                    "客户端卡死、联机时服务端直接超时。默认 2048，觉得慢可以调高，觉得卡就调低。",
-                    "How many crafts a single shift-click on the crafting result may perform. Vanilla loops",
-                    "until the inventory is full, which with 32768-sized stacks stalls the server.")
+            .comment("兜底上限：只在配方带「剩余物品」（桶装牛奶之类）走不了批量合成时生效。",
+                    "Shift 点击合成结果默认会一次把能合的全都合完，不再受这个数字限制。",
+                    "Fallback limit for recipes that cannot be batched (container-item recipes such as milk buckets).",
+                    "Normal shift-clicking crafts everything at once and ignores this value.")
             .defineInRange("maxCraftsPerClick", 2048, 1, 65_536);
 
     static final ModConfigSpec SPEC = BUILDER.build();
