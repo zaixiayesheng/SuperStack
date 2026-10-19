@@ -4,11 +4,14 @@
   "package": "com.zaixiayesheng.superstack.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AbstractContainerMenuMixin",
     "ContainerMixin",
-    "SlotMixin",
+    "CraftingMenuMixin",
     "ExtraCodecsMixin",
+    "InventoryMenuMixin",
     "ItemStackHandlerMixin",
-    "ComponentItemHandlerMixin"
+    "ComponentItemHandlerMixin",
+    "SlotMixin"
   ],
   "client": [
     "GuiGraphicsMixin"

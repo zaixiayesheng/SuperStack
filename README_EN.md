@@ -137,9 +137,17 @@ JDK 21, `gradlew build`, output in `build/libs/`.
 
 ## Changelog
 
-### 1.0.4
+### 1.0.5
+
+- Shift-clicking the crafting result no longer freezes the game. With tens of thousands of items in the grid, vanilla keeps crafting until the inventory is full, running tens of thousands of recipe lookups in one tick; a single click now stops after 2048 crafts, leaving the result slot and the ingredients untouched, and the next click continues.
+- The limit is configurable through `maxCraftsPerClick` (default 2048, range 1-65536). Nine stacks of iron used to take 32768 iterations in one click; with the default it takes 16 clicks, each finishing within a tick.
+
+<details>
+<summary><b>1.0.4</b></summary>
 
 - The AE2 slot patch now adds `getSlotLimit` directly. 1.0.3 targeted classes that only implement the interface without declaring the method, which crashed startup when AE2 was installed.
+
+</details>
 
 <details>
 <summary><b>1.0.3</b></summary>

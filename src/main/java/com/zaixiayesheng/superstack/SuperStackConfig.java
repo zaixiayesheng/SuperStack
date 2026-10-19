@@ -65,6 +65,14 @@ public final class SuperStackConfig {
                     "如果有机器因此拒收物品，再把它关掉。")
             .define("raiseModdedSlotLimits", true);
 
+    private static final ModConfigSpec.IntValue MAX_CRAFTS_PER_CLICK = BUILDER
+            .comment("按住 Shift 点击合成结果时，一次最多合成多少次。",
+                    "原版一次只会合成到背包放不下为止，但大堆叠下一格就有三万多个，合成循环会跑上万次，",
+                    "客户端卡死、联机时服务端直接超时。默认 2048，觉得慢可以调高，觉得卡就调低。",
+                    "How many crafts a single shift-click on the crafting result may perform. Vanilla loops",
+                    "until the inventory is full, which with 32768-sized stacks stalls the server.")
+            .defineInRange("maxCraftsPerClick", 2048, 1, 65_536);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
@@ -74,6 +82,7 @@ public final class SuperStackConfig {
     private static volatile int abbreviateFrom = 10000;
     private static volatile boolean tooltipExactCount = true;
     private static volatile boolean raiseModdedSlotLimits = true;
+    private static volatile int maxCraftsPerClick = 2048;
 
     private SuperStackConfig() {
     }
@@ -106,6 +115,10 @@ public final class SuperStackConfig {
         return raiseModdedSlotLimits;
     }
 
+    public static int maxCraftsPerClick() {
+        return maxCraftsPerClick;
+    }
+
     // ==== 下面几个方法是给混入调用的，只在"原版默认值"上动手，其余保持原样，尽量不影响别的模组 ====
 
     public static void onConfigLoad(ModConfigEvent event) {
@@ -128,6 +141,7 @@ public final class SuperStackConfig {
             abbreviateFrom = ABBREVIATE_FROM.get();
             tooltipExactCount = TOOLTIP_COUNT.get();
             raiseModdedSlotLimits = RAISE_MODDED_SLOT_LIMITS.get();
+            maxCraftsPerClick = MAX_CRAFTS_PER_CLICK.get();
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
             SuperStackLog.warn("配置尚未就绪，先使用默认值", e);
