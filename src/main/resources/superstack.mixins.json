@@ -11,7 +11,8 @@
     "ExtraCodecsMixin",
     "ItemStackHandlerMixin",
     "ComponentItemHandlerMixin",
-    "SlotMixin"
+    "SlotMixin",
+    "ItemEntityMergeGuardMixin"
   ],
   "client": [
     "GuiGraphicsMixin"

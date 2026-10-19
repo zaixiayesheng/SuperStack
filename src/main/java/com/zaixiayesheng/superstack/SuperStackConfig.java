@@ -27,9 +27,9 @@ public final class SuperStackConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
-            .comment("物品的堆叠上限。原版是 64，默认 32768。改完需要重启游戏。",
-                    "The new stack size limit for items. Vanilla is 64, default 32768. Restart required after changing.")
-            .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, 1_000_000);
+            .comment("物品的堆叠上限。原版是 64，默认 32768，上限 2147483647。改完需要重启游戏。",
+                    "The new stack size limit for items. Vanilla is 64, default 32768, upper bound Integer.MAX_VALUE (2147483647). Restart required after changing.")
+            .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, Integer.MAX_VALUE);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
             .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",

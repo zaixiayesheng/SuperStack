@@ -19,12 +19,13 @@ import net.neoforged.neoforge.event.EventHooks;
  * 一次点击把能合的全都合完。
  *
  * <p>原版的做法是一轮一轮地调 {@code quickMoveStack}，每轮重新查配方、扣材料、把产物塞进背包；
- * 一格 32768 个物品就意味着同一个 tick 里跑三万多次，客户端卡死、联机时服务端 tick 超时。
+ * 一格三万多物品就意味着同一个 tick 里跑三万多轮，客户端卡死、联机时服务端 tick 超时。
  *
  * <p>这里换成批量：先算出材料最多够合几次、背包最多还能放几次，取较小值，然后一次扣材料、
  * 一次把产物按堆叠上限分配进背包。整个过程只扫一遍槽位，与堆叠大小无关。
  *
- * <p>带「剩余物品」的配方（桶装牛奶之类）不在这里处理，交回原版循环，避免把容器物品算错。
+ * <p>堆叠上限允许开到 int 上限，所以所有「数量 × 次数」的中间量都用 long 计算，
+ * 产物按物品自身的上限分块插入，任何一步都不会因为 int 溢出而丢掉物品。
  */
 public final class SuperStackBulkCraft {
 
@@ -68,9 +69,9 @@ public final class SuperStackBulkCraft {
             return false;
         }
 
-        int perCraft = result.getCount();
-        int limitedBySpace = countFreeSpace(menu, result, inventoryStart, inventoryEnd) / perCraft;
-        int crafts = Math.min(limitedByInput, limitedBySpace);
+        int perCraft = Math.max(1, result.getCount());
+        long freeSpace = countFreeSpace(menu, result, inventoryStart, inventoryEnd);
+        int crafts = BulkCraftMath.capBySpace(limitedByInput, freeSpace, perCraft);
         if (crafts <= 0) {
             return false;
         }
@@ -88,29 +89,48 @@ public final class SuperStackBulkCraft {
             if (rem.isEmpty()) {
                 continue;
             }
-            ItemStack gave = rem.copyWithCount(rem.getCount() * crafts);
-            ItemStack current = craftSlots.getItem(i);
-            if (current.isEmpty()) {
-                craftSlots.setItem(i, gave);
-            } else if (ItemStack.isSameItemSameComponents(current, gave)) {
-                gave.grow(current.getCount());
-                craftSlots.setItem(i, gave);
-            } else if (!player.getInventory().add(gave)) {
-                player.drop(gave, false);
+            long total = (long) rem.getCount() * crafts;
+            while (total > 0) {
+                int chunk = BulkCraftMath.nextChunk(total, rem.getMaxStackSize());
+                ItemStack gave = rem.copyWithCount(chunk);
+                ItemStack current = craftSlots.getItem(i);
+                if (current.isEmpty()) {
+                    craftSlots.setItem(i, gave);
+                } else if (ItemStack.isSameItemSameComponents(current, gave)) {
+                    int room = current.getMaxStackSize() - current.getCount();
+                    if (room >= chunk) {
+                        current.grow(chunk);
+                    } else {
+                        current.grow(room);
+                        gave.shrink(room);
+                        if (!player.getInventory().add(gave)) {
+                            player.drop(gave, false);
+                        }
+                    }
+                } else if (!player.getInventory().add(gave)) {
+                    player.drop(gave, false);
+                }
+                total -= chunk;
             }
         }
 
-        // 一次把产物分配进背包
-        int produced = crafts * perCraft;
-        int leftover = insert(menu, result, produced, inventoryStart, inventoryEnd);
-        if (leftover > 0) {
-            ItemStack drop = result.copyWithCount(leftover);
-            if (!player.getInventory().add(drop)) {
-                player.drop(drop, false);
+        // 一次把产物分配进背包，按物品自身上限分块
+        long remainingOutput = (long) crafts * perCraft;
+        long produced = remainingOutput;
+        while (remainingOutput > 0) {
+            int chunk = BulkCraftMath.nextChunk(remainingOutput, result.getMaxStackSize());
+            long leftover = insert(menu, result, chunk, inventoryStart, inventoryEnd);
+            if (leftover > 0) {
+                ItemStack drop = result.copyWithCount((int) Math.min(leftover, result.getMaxStackSize()));
+                if (!player.getInventory().add(drop)) {
+                    player.drop(drop, false);
+                }
             }
+            remainingOutput -= chunk;
         }
 
-        result.onCraftedBy(player.level(), player, produced);
+        int producedInt = (int) Math.min(produced, Integer.MAX_VALUE);
+        result.onCraftedBy(player.level(), player, producedInt);
         player.awardStat(Stats.ITEM_CRAFTED.get(result.getItem()), crafts);
         if (resultSlots instanceof RecipeCraftingHolder holder) {
             holder.awardUsedRecipes(player, craftSlots.getItems());
@@ -122,9 +142,9 @@ public final class SuperStackBulkCraft {
         return true;
     }
 
-    /** 背包里还能放下多少个这种物品（含空格）。 */
-    private static int countFreeSpace(AbstractContainerMenu menu, ItemStack result, int start, int end) {
-        int space = 0;
+    /** 背包里还能放下多少个这种物品（含空格），用 long 累加，上限开满 int 也不会溢出。 */
+    private static long countFreeSpace(AbstractContainerMenu menu, ItemStack result, int start, int end) {
+        long space = 0L;
         for (int i = start; i < end; i++) {
             Slot slot = menu.slots.get(i);
             ItemStack stack = slot.getItem();
@@ -139,7 +159,7 @@ public final class SuperStackBulkCraft {
     }
 
     /** 把 count 个 result 塞进背包，返回没塞下的数量。 */
-    private static int insert(AbstractContainerMenu menu, ItemStack result, int count, int start, int end) {
+    private static long insert(AbstractContainerMenu menu, ItemStack result, int count, int start, int end) {
         int remaining = count;
         for (int i = start; i < end && remaining > 0; i++) {
             Slot slot = menu.slots.get(i);

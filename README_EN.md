@@ -57,6 +57,7 @@ The multiplier is `maxStackSize / 64`, i.e. ×512 by default. Rules:
 - Items with durability (tools, armor, Meka gear) are untouched.
 - Items whose vanilla limit is at or below `minimumStackSizeThreshold` (1 by default) are untouched.
 - With `scaleSmallStacks` disabled, every item uses `maxStackSize`.
+- The limit itself can go up to 2,147,483,647; 32,768 is only a conservative default.
 
 Saving and network sync are rewritten as well: counts embedded in items (for example the nine slots carried by an upgrade) are stored as ints and synced as VarInts, so a stack of 32,768 survives a save/load round trip.
 
@@ -113,7 +114,7 @@ The file is `config/superstack-common.toml`; restart after editing.
 
 | Option | Default | Range | Meaning |
 |---|---|---|---|
-| `maxStackSize` | 32768 | 64–1,000,000 | Item stack limit |
+| `maxStackSize` | 32768 | 64–2,147,483,647 | Item stack limit |
 | `scaleSmallStacks` | true | — | Scale small stacks (16 → 8,192); disable to use the limit for everything |
 | `minimumStackSizeThreshold` | 1 | 0–64 | Items at or below this vanilla limit are not raised |
 | `countDisplay` | COMPACT | COMPACT / EXACT | Slot count rendering style |
@@ -182,7 +183,15 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ## Changelog
 
-### 21.1-1.0.5
+### 21.1-1.0.6
+
+- The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
+- Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
+- Ground item merging is guarded: two big stacks no longer take part in vanilla's 64-per-step merge, which could overflow the added counts; stacks of 64 or less merge as before.
+- Verified: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt keep their counts across a save and reload; two two-billion stacks next to each other do not merge.
+
+<details>
+<summary><b>21.1-1.0.5</b></summary>
 
 - Shift-clicking the crafting result now crafts everything at once: the mod computes how many crafts the ingredients allow and how many the inventory can hold, takes the smaller value, then consumes and distributes in one pass. Vanilla re-checks the recipe, consumes items and inserts output every round, so tens of thousands of items froze the game or timed out on servers.
 - Nine stacks of iron (32,768 × 9) now turns into 32,768 iron blocks in a single click without a server tick timeout.
@@ -192,6 +201,8 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - Iron Furnaces output limit follows the config instead of stopping at 64.
 - Added the missing `pack.mcmeta`.
 - Breaking chests, barrels, furnaces and hoppers drops a big stack as a single entity; before, a 32,768 stack became roughly 1,600 item entities.
+
+</details>
 
 <details>
 <summary><b>21.1-1.0.4</b></summary>
