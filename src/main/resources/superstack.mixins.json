@@ -18,6 +18,7 @@
     "AbstractFurnaceBlockEntityMixin",
     "HopperBlockEntityMixin",
     "RandomizableContainerBlockEntityMixin",
+    "ContainersDropStackMixin",
     "CreativeSlotLimitMixin"
   ],
   "client": [

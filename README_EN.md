@@ -32,7 +32,7 @@ This mod raises all three to a configurable value (default 32768) and replaces t
 
 | File | Required | Notes |
 |---|---|---|
-| `SuperStack-1.20.1-1.0.0.jar` | yes | The mod, single jar |
+| `SuperStack-1.20.1-20.1-1.0.1.jar` | yes | The mod, single jar |
 | Minecraft 1.20.1 + Forge 47.4+ | yes | Requires Java 17 |
 
 - Mekanism 10.4.16.x, Applied Energistics 2 15.4.x and Sophisticated Core / Storage / Backpacks are **optional**: their patches only load when the mod is present, otherwise a single log line is written.
@@ -133,7 +133,7 @@ JDK 17 and a Forge 47.4 development environment, `gradlew build`, output in `bui
 
 ## Changelog
 
-### 1.0.1
+### 20.1-1.0.1
 
 - Shift-clicking the crafting result now crafts everything that fits in one go. Vanilla loops one craft at a time, re-checking the recipe and moving a single item each round, so tens of thousands of items mean tens of thousands of iterations in a single tick and a server timeout. The mod computes how many crafts the inputs and the free inventory space allow, consumes the ingredients once and distributes the output once.
 - Nine stacks of iron (32768 x 9) now turn into 32768 iron blocks on a single click.
@@ -145,7 +145,14 @@ JDK 17 and a Forge 47.4 development environment, `gradlew build`, output in `bui
 - Sophisticated Core storage slots (backpacks, chests, barrels) follow the configured limit; they were previously pinned at 64, so a whole stack of 32768 got split into many 64s.
 - The player inventory follows the configured limit as well. In 1.20.1 `Container.getMaxStackSize()` defaults to 64 and the inventory, item pickup and `/give` all use that default, so the inventory stayed at 64 per slot even after item limits were raised; this build replaces both the slot limit and the inventory's internal merge limit.
 - Added `pack.mcmeta`, so the resource and data pack loaders no longer report missing metadata.
-### 1.0.0
+- Chests, hoppers, furnaces and double chests now follow the configured limit too. In 1.20.1 their `getMaxStackSize()` defaults to 64, which clamped any larger stack on insertion.
+- Creative-mode stacks above 64 are no longer discarded by the server (1.20.1 hard-codes `count <= 64` in the creative slot packet), so picking up 32768 items no longer turns into an empty slot after opening a chest.
+- Iron Furnaces keeps its own inventory limit (`TileEntityInventory` declares `getMaxStackSize`); that and the Forge item handler wrapper now follow the configured limit, so pipe input to modded machines is not stuck at 64.
+- Breaking a vanilla container drops each oversized stack as a single item entity instead of scattering it into thousands of items.
+- Closing the crafting table with a full inventory puts the grid back into the inventory where possible; what does not fit drops as whole stacks instead of dozens of 64-sized piles.
+- Fixed the injection targets of the Sophisticated crafting grid and Iron Furnaces patches, and added the missing `pack.mcmeta`.
+
+### 20.1-1.0.0
 
 - First Forge 1.20.1 build with feature parity to the 1.21.1 line: configurable cap (default 32768), scaled small stacks, exact and abbreviated counters.
 - 1.20.1 stores the count as a byte, so the NBT path uses an int and the network path uses a VarInt; values above 127 no longer overflow.
