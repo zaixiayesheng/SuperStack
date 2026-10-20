@@ -13,7 +13,8 @@
     "Ae2CarriedItemInventoryMixin",
     "SophisticatedStatefulComponentItemHandlerMixin",
     "SophisticatedInventorySorterMixin",
-    "CucumberBaseItemStackHandlerMixin"
+    "CucumberBaseItemStackHandlerMixin",
+    "MekmmBigStackSlotMixin"
   ],
   "injectors": {
     "defaultRequire": 1

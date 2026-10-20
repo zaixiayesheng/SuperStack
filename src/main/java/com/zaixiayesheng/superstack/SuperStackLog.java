@@ -117,6 +117,8 @@ public final class SuperStackLog {
                 "net.p3pp3rf1y.sophisticatedcore.util.InventorySorter",
                 "net.p3pp3rf1y.sophisticatedcore.inventory.StatefulComponentItemHandler",
                 "com.blakebr0.cucumber.inventory.BaseItemStackHandler",
+                "com.jerry.meklm.common.inventory.slot.BigStackInputInventorySlot",
+                "com.jerry.meklm.common.inventory.slot.BigStackOutputInventorySlot",
                 "appeng.util.inv.AppEngInternalInventory",
                 "appeng.menu.slot.AppEngSlot",
                 "appeng.util.inv.PlayerInternalInventory",
