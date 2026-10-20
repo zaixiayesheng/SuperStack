@@ -117,7 +117,7 @@ The file is `config/superstack-common.toml`; restart after editing.
 | Option | Default | Range | Meaning |
 |---|---|---|---|
 | `maxStackSize` | 32768 | 64–2,147,483,647 | Item stack limit |
-| `compatStackLimit` | 32768 | 64–2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces); same as the stack size by default; raise it with the stack size when you need bigger modded slots, but keep it moderate since some mods use the value as an array size or multiplier |
+| `compatStackLimit` | 2147483647 | 1–2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces, Mystical Agriculture); follows the stack size by default, lower it only if a mod misbehaves |
 | `scaleSmallStacks` | true | — | Scale small stacks (16 → 8,192); disable to use the limit for everything |
 | `minimumStackSizeThreshold` | 1 | 0–64 | Items at or below this vanilla limit are not raised |
 | `countDisplay` | COMPACT | COMPACT / EXACT | Slot count rendering style |
@@ -188,9 +188,11 @@ Jars needed by the third-party patches live in `libs/` as `compileOnly` dependen
 ## Changelog
 
 ### 20.1-1.0.2
+- Compat slot limits no longer add a separate ceiling: `compatStackLimit` follows the stack size by default, so modded machine slots accept the same large stacks; lower it only if a mod misuses the value.
+- MoreMachine big-stack slots: the x8 multiplication now saturates instead of throwing once the stack limit passes 268 million.
 
 - Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
-- Slot limits exposed to supported mods now come from `compatStackLimit` (32,768 by default), so a modest value keeps modded slots working; raise it alongside the stack size if needed.
+- Slot limits exposed to supported mods come from `compatStackLimit`, which follows the stack size by default; lower it if a mod misbehaves with very large values.
 - Iron Furnaces: fixed an out-of-memory crash while loading a furnace, caused by the mod using the container limit as its inventory size.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
 - Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
