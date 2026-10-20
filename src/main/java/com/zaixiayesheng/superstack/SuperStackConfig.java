@@ -76,7 +76,6 @@ public final class SuperStackConfig {
 
 
     static {
-        BUILDER.pop();
         BUILDER.push("compat");
     }
 
