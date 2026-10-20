@@ -29,60 +29,47 @@ public final class SuperStackConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
-            .comment("物品的堆叠上限。原版是 64，默认 32768，上限 2147483647。改完需要重启游戏。",
-                    "The new stack size limit for items. Vanilla is 64, default 32768, upper bound Integer.MAX_VALUE (2147483647). Restart required after changing.")
+            .comment(Text.pick(new String[]{"物品的堆叠上限。原版是 64，默认 32768，上限 2147483647。改完需要重启游戏。"}, new String[]{"The new stack size limit for items. Vanilla is 64, default 32768, upper bound 2147483647. Restart required after changing."}))
             .translation("superstack.configuration.maxStackSize")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, Integer.MAX_VALUE);
     private static final ModConfigSpec.IntValue COMPAT_STACK_LIMIT = BUILDER
-            .comment("联动模组（通用机械、应用能源、精妙、更多熔炉、神秘农业）看到的槽位上限。默认 32768，与默认堆叠上限一致；把最大堆叠调得更高时，这里也要跟着调，否则那些机器的槽位仍停在 32768。只要模组自己声明的上限大于 64/99，就不受这一项影响。",
-                    "Slot limit exposed to supported mods. Deliberately lower than the stack size; raise it only if you know those mods handle huge values.")
+            .comment(Text.pick(new String[]{"联动模组（通用机械、应用能源、精妙、更多熔炉、神秘农业）看到的槽位上限。", "默认 32768，与默认堆叠上限一致；把最大堆叠调高时这里也要跟着调。", "只替换这些模组里写死的 64 或 99，模组自己声明的更大上限不受影响。"}, new String[]{"Slot limit exposed to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces, Mystical Agriculture).", "Defaults to 32768, matching the default stack size; raise it together with maxStackSize.", "Only hardcoded 64/99 limits are replaced; limits a mod declares itself are left alone."}))
             .translation("superstack.configuration.compatStackLimit")
             .defineInRange("compatStackLimit", DEFAULT_COMPAT_STACK_LIMIT, 1, Integer.MAX_VALUE);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
-            .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",
-                    "关掉的话所有物品统一用 maxStackSize。",
-                    "Whether items with smaller vanilla stack sizes (eg. ender pearls) are scaled proportionally.")
+            .comment(Text.pick(new String[]{"小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。", "关掉的话所有物品统一用 maxStackSize。"}, new String[]{"Whether items with smaller vanilla stack sizes (eg. ender pearls) are scaled proportionally.", "When off, every item uses maxStackSize."}))
             .translation("superstack.configuration.scaleSmallStacks")
             .define("scaleSmallStacks", true);
 
     private static final ModConfigSpec.IntValue MIN_THRESHOLD = BUILDER
-            .comment("原版上限不超过这个值的物品不放大。默认 1，也就是只有原本只能堆 1 个的物品（工具、桶之类）保持不变。")
+            .comment(Text.pick(new String[]{"原版上限不超过这个值的物品不放大。默认 1，也就是只有原本只能堆 1 个的物品（工具、桶之类）保持不变。"}, new String[]{"Items whose vanilla limit is at or below this value are left alone. Default 1 keeps properly unstackable items (tools, buckets) unchanged."}))
             .translation("superstack.configuration.minimumStackSizeThreshold")
             .defineInRange("minimumStackSizeThreshold", 1, 0, 64);
 
     private static final ModConfigSpec.EnumValue<CountDisplay> COUNT_DISPLAY = BUILDER
-            .comment("槽位里数量怎么显示：",
-                    "COMPACT —— 超过门槛后换成单位缩写（12.3k、1.23m），和精妙背包一致，默认；",
-                    "EXACT —— 一律显示精确数字（缩放到塞得下为止）。",
-                    "两种方式都能在提示框里看到精确数量。")
+            .comment(Text.pick(new String[]{"槽位里数量怎么显示：", "COMPACT —— 超过门槛后换成单位缩写（12.3k、1.23m），和精妙背包一致，默认；", "EXACT —— 一律显示精确数字（缩放到塞得下为止）。", "两种方式都能在提示框里看到精确数量。"}, new String[]{"How slot counts are drawn:", "COMPACT: switch to k/m/b abbreviations past the threshold, same as Sophisticated Storage, default;", "EXACT: always draw the full number, scaled down to fit.", "Either way the tooltip shows the exact amount."}))
             .translation("superstack.configuration.countDisplay")
             .defineEnum("countDisplay", CountDisplay.COMPACT);
 
     private static final ModConfigSpec.IntValue ABBREVIATE_FROM = BUILDER
-            .comment("数量达到多少开始用单位缩写。默认 10000（也就是 1000~9999 还是显示 1,234 这种精确写法，和精妙背包一致）。",
-                    "想让它从 1000 就开始缩写就填 1000。")
+            .comment(Text.pick(new String[]{"数量达到多少开始用单位缩写。默认 10000（1000~9999 仍显示 1,234 这种精确写法）。", "想让它从 1000 就开始缩写就填 1000。"}, new String[]{"Count from which abbreviations start. Default 10000 (1000-9999 keep the exact form like 1,234).", "Set 1000 to abbreviate from a thousand."}))
             .translation("superstack.configuration.abbreviateFrom")
             .defineInRange("abbreviateFrom", 10000, 1000, 1_000_000);
 
     private static final ModConfigSpec.BooleanValue TOOLTIP_COUNT = BUILDER
-            .comment("鼠标悬停时在提示框里显示精确数量（数量超过 99 才显示）。")
+            .comment(Text.pick(new String[]{"鼠标悬停时在提示框里显示精确数量（数量超过 99 才显示）。"}, new String[]{"Show the exact count on the item tooltip (only when the count is above 99)."}))
             .translation("superstack.configuration.tooltipExactCount")
             .define("tooltipExactCount", true);
 
     private static final ModConfigSpec.BooleanValue RAISE_MODDED_SLOT_LIMITS = BUILDER
-            .comment("是否也放大其它模组的物品槽上限（ItemStackHandler / ComponentItemHandler）。",
-                    "默认打开：有些整理模组（比如精妙整理）整理时会先把槽位内容复制进一个这样的物品槽再排回去，",
-                    "如果这个槽位上限还停在自己的默认值（NeoForge 的是 99），大堆叠就会在整理时被截断丢掉。",
-                    "实测：10000 的堆叠 + 精妙整理整理背包，关掉这项会从 270000 掉到 2673，打开则一个不少。",
-                    "如果有机器因此拒收物品，再把它关掉。")
+            .comment(Text.pick(new String[]{"是否也放大其它模组的物品槽上限（ItemStackHandler / ComponentItemHandler）。", "默认打开：有些整理模组整理时会先把槽位内容复制进这样的物品槽再排回去，", "槽位上限若停在默认值（99），大堆叠会在整理时被截断。", "实测：10000 的堆叠 + 精妙整理，关掉会从 270000 掉到 2673，打开则一个不少。", "如果有机器因此拒收物品，再把它关掉。"}, new String[]{"Also raise other mods' item handler limits (ItemStackHandler / ComponentItemHandler).", "On by default: some sorting mods copy slot contents into such a handler before sorting back;", "if that handler still uses its default limit (99), big stacks get truncated while sorting.", "Measured: 10000 stacks with Sophisticated sorting drops 270000 -> 2673 when off, nothing lost when on.", "Turn it off if some machine then refuses items."}))
             .translation("superstack.configuration.raiseModdedSlotLimits")
             .define("raiseModdedSlotLimits", true);
 
 
     private static final ModConfigSpec.IntValue FAN_PROCESSING_VIRTUAL_STACK_SIZE = BUILDER
-            .comment("鼓风机的处理时长按「这一堆算多少个」来计算，原版公式是 (数量-1)/16+1。这里给参与计算的数量加一个上限：堆叠不超过它时用真实数量（与原版一致），超过它时按它计算。64 等于原版一组的速度，调小更快，1 最快。",
-                    "The fan processing time is computed from a stack count with the vanilla formula (count-1)/16+1. This value caps the count used: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. 64 equals the vanilla 64-stack speed, lower is faster, 1 is the fastest.")
+            .comment(Text.pick(new String[]{"鼓风机的处理时长按「这一堆算多少个」来计算，原版公式是 (数量-1)/16+1。", "这里给参与计算的数量加一个上限：堆叠不超过它时用真实数量（与原版一致），超过它时按它计算。", "64 等于原版一组的速度，调小更快，1 最快。"}, new String[]{"The fan processing time is computed from a stack count with the vanilla formula (count-1)/16+1.", "This value caps the count used: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value.", "64 equals the vanilla 64-stack speed, lower is faster, 1 is the fastest."}))
             .translation("superstack.configuration.fanProcessingVirtualStackSize")
             .defineInRange("fanProcessingVirtualStackSize", 64, 1, 64);
 

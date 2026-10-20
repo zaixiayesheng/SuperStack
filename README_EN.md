@@ -126,6 +126,8 @@ File: `config/superstack-common.toml`. Changes apply after a restart.
 | `raiseModdedSlotLimits` | true | - | Raise slot limits of other mods |
 | `fanProcessingVirtualStackSize` | 64 | 1 to 64 | Upper bound on the count Create fans use when computing processing time: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. Vanilla formula is `(count-1)/16+1`; 64 equals the vanilla 64-stack speed, lower is faster, 1 is fastest |
 
+Comments inside the generated config file follow the JVM language: Chinese or English, falling back to Chinese for other locales. Force one with `-Dsuperstack.config.lang=zh` or `=en`. An existing `superstack-common.toml` is not rewritten automatically; delete it to regenerate the comments in the new language.
+
 ## FAQ
 
 **What happens if I uninstall it?**
