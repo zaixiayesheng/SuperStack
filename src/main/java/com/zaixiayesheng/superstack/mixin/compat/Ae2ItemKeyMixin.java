@@ -17,7 +17,8 @@ public abstract class Ae2ItemKeyMixin {
 
     @Inject(method = "getMaxStackSize", at = @At("RETURN"), cancellable = true, remap = false)
     private void superstack$raiseMaxStackSize(CallbackInfoReturnable<Integer> cir) {
-        int configured = SuperStackConfig.maxStackSize();
+        int configured = SuperStackConfig.compatEnabled(SuperStackConfig.CompatPatch.AE2)
+                ? SuperStackConfig.maxStackSize() : SuperStackConfig.VANILLA_MAX_STACK_SIZE;
         if (cir.getReturnValue() < configured) {
             cir.setReturnValue(configured);
         }

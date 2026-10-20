@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(targets = "appeng.util.inv.CarriedItemInventory", remap = false)
 public abstract class Ae2CarriedItemInventoryMixin {
     public int getSlotLimit(int slot) {
-        return SuperStackConfig.raiseCompatLimit(99);
+        return SuperStackConfig.raiseCompatLimit(SuperStackConfig.CompatPatch.AE2, 99);
     }
 }

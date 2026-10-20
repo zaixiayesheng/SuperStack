@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class Ae2AppEngInternalInventoryMixin {
     @Inject(method = "getSlotLimit(I)I", at = @At("RETURN"), cancellable = true)
     private void superstack$raiseLimit(int slot, CallbackInfoReturnable<Integer> cir) {
-        cir.setReturnValue(SuperStackConfig.raiseCompatLimit(cir.getReturnValue()));
+        cir.setReturnValue(SuperStackConfig.raiseCompatLimit(SuperStackConfig.CompatPatch.AE2, cir.getReturnValue()));
     }
 }

@@ -32,6 +32,6 @@ public abstract class IronFurnacesInventoryLimitMixin {
         remap = false
     )
     private int superstack$raiseSetItemClamp(TileEntityInventory instance) {
-        return SuperStackConfig.maxStackSize();
+        return SuperStackConfig.ironFurnaceLimit(SuperStackConfig.VANILLA_MAX_STACK_SIZE);
     }
 }

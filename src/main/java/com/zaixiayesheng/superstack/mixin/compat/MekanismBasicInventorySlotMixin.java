@@ -20,6 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MekanismBasicInventorySlotMixin {
     @Inject(method = "getLimit(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"), cancellable = true)
     private void superstack$raiseLimit(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-        cir.setReturnValue(SuperStackConfig.raiseCompatLimit(cir.getReturnValue()));
+        cir.setReturnValue(SuperStackConfig.raiseCompatLimit(SuperStackConfig.CompatPatch.MEKANISM, cir.getReturnValue()));
     }
 }

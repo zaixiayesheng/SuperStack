@@ -22,7 +22,7 @@ public final class SuperStackConfig {
     public static final int DEFAULT_MAX_STACK_SIZE = 32768;
 
     /** 原版的默认堆叠上限，缩放比例以它为基准。 */
-    private static final int VANILLA_MAX_STACK_SIZE = 64;
+    public static final int VANILLA_MAX_STACK_SIZE = 64;
 
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
@@ -74,6 +74,51 @@ public final class SuperStackConfig {
         BUILDER.pop();
     }
 
+
+    static {
+        BUILDER.pop();
+        BUILDER.push("compat");
+    }
+
+    private static final ForgeConfigSpec.BooleanValue MEKANISM_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"通用机械：让机器槽位吃下超大堆叠。"}, new String[]{"Mekanism machine slots accept larger stacks."}))
+            .translation("superstack.configuration.compatMekanism")
+            .define("compatMekanism", true);
+
+    private static final ForgeConfigSpec.BooleanValue MEKMM_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"更多机器：大型机器的堆叠槽位。"}, new String[]{"Mekanism: MoreMachine big-stack slots."}))
+            .translation("superstack.configuration.compatMekmm")
+            .define("compatMekmm", true);
+
+    private static final ForgeConfigSpec.BooleanValue AE2_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"应用能源 2：终端与合成格。"}, new String[]{"Applied Energistics 2 terminals and slots."}))
+            .translation("superstack.configuration.compatAe2")
+            .define("compatAe2", true);
+
+    private static final ForgeConfigSpec.BooleanValue SOPHISTICATED_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"精妙：容器与合成升级的合成格。"}, new String[]{"Sophisticated containers and crafting upgrade grid."}))
+            .translation("superstack.configuration.compatSophisticated")
+            .define("compatSophisticated", true);
+
+    private static final ForgeConfigSpec.BooleanValue IRON_FURNACES_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"更多熔炉：输出格上限。"}, new String[]{"Iron Furnaces output slot."}))
+            .translation("superstack.configuration.compatIronFurnaces")
+            .define("compatIronFurnaces", true);
+
+    private static final ForgeConfigSpec.BooleanValue MYSTICAL_AGRICULTURE_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"神秘农业：机器内部槽位。"}, new String[]{"Mystical Agriculture machines (Cucumber item handler)."}))
+            .translation("superstack.configuration.compatMysticalAgriculture")
+            .define("compatMysticalAgriculture", true);
+
+    private static final ForgeConfigSpec.BooleanValue CREATE_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"机械动力：鼓风机时长与过滤器设置界面。"}, new String[]{"Create fans and filter value screens."}))
+            .translation("superstack.configuration.compatCreate")
+            .define("compatCreate", true);
+
+    static {
+        BUILDER.pop();
+    }
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
@@ -83,7 +128,53 @@ public final class SuperStackConfig {
     private static volatile int abbreviateAbove = 10000;
     private static volatile boolean tooltipExact = true;
     private static volatile boolean otherModSlots = true;
+    private static volatile boolean compatMekanism = true;
+    private static volatile boolean compatMekmm = true;
+    private static volatile boolean compatAe2 = true;
+    private static volatile boolean compatSophisticated = true;
+    private static volatile boolean compatIronFurnaces = true;
+    private static volatile boolean compatMysticalAgriculture = true;
+    private static volatile boolean compatCreate = true;
 
+
+    public enum CompatPatch {
+        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE;
+    }
+
+    public static boolean compatEnabled(CompatPatch patch) {
+        return switch (patch) {
+            case MEKANISM -> compatMekanism;
+            case MEKMM -> compatMekmm;
+            case AE2 -> compatAe2;
+            case SOPHISTICATED -> compatSophisticated;
+            case IRON_FURNACES -> compatIronFurnaces;
+            case MYSTICAL_AGRICULTURE -> compatMysticalAgriculture;
+            case CREATE -> compatCreate;
+        };
+    }
+
+    public static int raiseCompatLimit(CompatPatch patch, int original) {
+        return compatEnabled(patch) ? raiseLegacyDefault(original) : original;
+    }
+
+    public static int ironFurnaceLimit(int original) {
+        return compatEnabled(CompatPatch.IRON_FURNACES) ? maxStackSize : original;
+    }
+
+    public static int createFilterLimit(int original) {
+        return compatEnabled(CompatPatch.CREATE) ? Math.min(original, VANILLA_MAX_STACK_SIZE) : original;
+    }
+
+    public static int fanCountFor(int count) {
+        return count;
+    }
+
+    public static int mekmmSlotLimit(int original) {
+        if (!compatEnabled(CompatPatch.MEKMM)) {
+            return original;
+        }
+        return original > maxStackSize ? maxStackSize : original;
+    }
     private SuperStackConfig() {
     }
 
@@ -137,6 +228,14 @@ public final class SuperStackConfig {
             abbreviateAbove = ABBREVIATE_ABOVE.get();
             tooltipExact = TOOLTIP_EXACT.get();
             otherModSlots = OTHER_MOD_SLOTS.get();
+            compatMekanism = MEKANISM_PATCH.get();
+            compatMekmm = MEKMM_PATCH.get();
+            compatAe2 = AE2_PATCH.get();
+            compatSophisticated = SOPHISTICATED_PATCH.get();
+            compatIronFurnaces = IRON_FURNACES_PATCH.get();
+            compatMysticalAgriculture = MYSTICAL_AGRICULTURE_PATCH.get();
+            compatCreate = CREATE_PATCH.get();
+
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
             SuperStackLog.warn("配置尚未就绪，先使用默认值", e);
