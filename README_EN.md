@@ -125,6 +125,8 @@ The file is `config/superstack-common.toml`; restart after editing.
 | `tooltipExactCount` | true | — | Show the exact count in tooltips |
 | `raiseModdedSlotLimits` | true | — | Raise slot limits of other mods |
 
+Comments inside the generated config file follow the JVM language: Chinese or English, falling back to Chinese for other locales. Force one with `-Dsuperstack.config.lang=zh` or `=en`. An existing `superstack-common.toml` is not rewritten automatically; delete it to regenerate the comments in the new language.
+
 ## FAQ
 
 **What happens if I uninstall it?**

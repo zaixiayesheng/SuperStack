@@ -125,6 +125,8 @@ Shift 点击合成结果时，先算「合成格最少的那一格够合几次�
 | `tooltipExactCount` | true | — | 悬停时显示精确数量 |
 | `raiseModdedSlotLimits` | true | — | 是否抬高其它模组的物品槽上限 |
 
+配置文件里的注释会按运行环境（JVM 的语言设置）自动选中文或英文；系统语言既不是中文也不是英文时用中文。需要强制指定时加 JVM 参数 `-Dsuperstack.config.lang=zh` 或 `=en`。已经生成的 `superstack-common.toml` 不会自动改写，换语言后删掉这个文件让它重新生成即可。
+
 ## 常见问题
 
 **卸载后会怎样？**
