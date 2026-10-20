@@ -185,6 +185,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 ## Changelog
 
 ### 21.1-1.0.6
+- MoreMachine big-stack slots no longer exceed the configured stack size (they used to hold 8x, going past the item stack limit; the surplus was dropped on reload).
 - Compat slot limits no longer add a separate ceiling: `compatStackLimit` follows the stack size by default, so modded machine slots accept the same large stacks; lower it only if a mod misuses the value.
 - MoreMachine big-stack slots: the x8 multiplication now saturates instead of throwing once the stack limit passes 268 million.
 
