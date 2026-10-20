@@ -172,7 +172,6 @@ This mod changes saved data. Back up your world, or test it in a copy first.
 | `BulkCraftMath` | Pure arithmetic: availability, crafts, output, space, chunking, conservation checks, with JUnit tests |
 | `ContainersDropStackMixin` | Large stacks drop as a single entity when a container is broken |
 | `ItemEntityMergeGuardMixin` | Merges use long arithmetic and the configured limit instead of the hard-coded 64 |
-| `ItemStackComponentNormalizeMixin` | Normalises the stale `max_stack_size` variants left by earlier versions (explicit 64, removal marker, or an explicit copy of the configured limit), including in hashing |
 | `GuiGraphicsMixin` / `CountFormat` | Abbreviated, scaled count rendering |
 | `ClientEvents` | Adds the "current / limit" tooltip line |
 | `mixin/compat/*` | Per-mod slot patches in a separate config, skipped when the mod is absent |
@@ -190,18 +189,13 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ### 21.1-1.0.6
 - Ground item stacks merge up to the configured limit without overflowing: counts are added as long, and the hard-coded 64 inside vanilla `merge` now uses the config. Measured: 1.5e9 + 5e8 merges into 2e9, while 1.5e9 + 1.5e9 stays as two stacks.
-- Stale component variants in existing saves (an explicit 64, or an "removed" marker) are normalised on read. Only those two traces left by earlier versions are touched; intentional 1/16/32 limits from data packs stay as they are.
-- Applied Energistics caches the hash inside `AEItemKey` at construction, so old variants and clean stacks never compared equal. Hashing now runs on the normalised components, letting old and new data collapse into one entry.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64 to 2,147,483,647 instead of 64 to 1,000,000. The default stays 32,768.
 - Bulk crafting accounts with long all the way: ingredients, output and returned items are chunked by their own limits, so a single slot holding two billion items cannot lose anything to int overflow.
-- Ground item merging is guarded: two large stacks no longer participate in vanilla's 64-per-step merging, so counts cannot overflow. Stacks of 64 or fewer still merge like vanilla.
 - Compat slot limit no longer imposes a separate ceiling: `compatStackLimit` follows the stack size by default, so modded machine slots accept the same large stacks; lower it for mods that treat the limit as an array length.
 - More Machine large-stack slots: the "multiply by 8" path uses saturating multiplication and the result is capped at the configured stack limit (it used to reach 262,144, beyond the item limit, and got truncated on save).
 - Mystical Agriculture / Automation: Cucumber's shared slot default of 64 now uses the compat limit, so infusion machines accept large stacks; slots with an explicit limit keep it.
 - Sophisticated Core: sorting no longer runs when same-item totals exceed int; it used to overflow into a negative number and wipe both stacks.
 - Create fans: processing time no longer scales with the real stack count without limit. The count used is capped by `fanProcessingVirtualStackSize` (default 64): small stacks keep their real count and behave exactly like vanilla, large stacks are treated as 64. A 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
-- Applied Energistics: terminal extraction and storage splitting follow the configured limit. `AEItemKey` caches the limit as an int at construction, so items created before this mod raised the limit (for example drawer output) were cut to 64 when pulled out; they now return the configured value.
-- Applied Energistics (follow-up): the stack stored inside `AEItemKey` is normalised at construction instead of having the "limit 64" component removed; removal left an explicit "removed" marker that collapsed the limit to 1.
 - Create: the filter's "extract amount" range is back to the vanilla 64. It draws the scale bar from the filtered item's limit, and 32,768 stretched the screen past its edges; stored values above 64 are clamped when the block loads.
 - Measured: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt both survive a save and reload unchanged; two adjacent stacks of 2e9 do not merge.
 

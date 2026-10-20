@@ -6,7 +6,6 @@
   "mixins": [
     "IronFurnacesFurnaceTileMixin",
     "MekanismBasicInventorySlotMixin",
-    "Ae2ItemKeyMixin",
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
     "Ae2SlotMixin",
