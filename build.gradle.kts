@@ -5,7 +5,7 @@ plugins {
 }
 
 val modId = "superstack"
-val modVersion = "21.1-1.0.7"
+val modVersion = "21.1-1.0.6"
 val mcVersion = "1.21.1"
 val neoVersion = "21.1.251"
 val parchmentMappings = "2024.11.17"

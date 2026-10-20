@@ -185,7 +185,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ## Changelog
 
-### 21.1-1.0.7
+### 21.1-1.0.6
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
 - Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
 - Ground item merging is guarded: two big stacks no longer take part in vanilla's 64-per-step merge, which could overflow the added counts; stacks of 64 or less merge as before.
