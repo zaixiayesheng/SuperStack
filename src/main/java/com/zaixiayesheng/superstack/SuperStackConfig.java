@@ -33,7 +33,7 @@ public final class SuperStackConfig {
                     "The new stack size limit for items. Vanilla is 64, default 32768, upper bound Integer.MAX_VALUE (2147483647). Restart required after changing.")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, Integer.MAX_VALUE);
     private static final ModConfigSpec.IntValue COMPAT_STACK_LIMIT = BUILDER
-            .comment("联动模组（通用机械、应用能源、精妙、更多熔炉）看到的槽位上限。默认 1000000，比堆叠上限低，避免第三方把槽位上限当数组长度或做乘法时溢出。",
+            .comment("联动模组（通用机械、应用能源、精妙、更多熔炉、神秘农业）看到的槽位上限。默认跟随堆叠上限；只有当某个模组把槽位上限当数组长度或拿去做乘法、导致异常时，才需要把它调低。",
                     "Slot limit exposed to supported mods. Deliberately lower than the stack size; raise it only if you know those mods handle huge values.")
             .defineInRange("compatStackLimit", DEFAULT_COMPAT_STACK_LIMIT, 1, Integer.MAX_VALUE);
 
