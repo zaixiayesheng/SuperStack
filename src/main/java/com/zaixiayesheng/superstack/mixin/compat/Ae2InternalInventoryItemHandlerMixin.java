@@ -15,6 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class Ae2InternalInventoryItemHandlerMixin {
     @ModifyReturnValue(method = "getSlotLimit(I)I", at = @At("RETURN"))
     private int superstack$raiseSlotLimit(int original) {
-        return SuperStackConfig.raiseCompatLimit(original);
+        return SuperStackConfig.raiseCompatLimit(SuperStackConfig.CompatPatch.AE2, original);
     }
 }

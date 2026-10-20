@@ -1,6 +1,7 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.zaixiayesheng.superstack.SuperStackConfig;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -27,12 +28,12 @@ public abstract class CreateFilteringBehaviourMixin {
 
     @ModifyReturnValue(method = "getMaxStackSize(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"))
     private int superstack$capSettingRange(int original) {
-        return Math.min(original, 64);
+        return SuperStackConfig.createFilterLimit(original);
     }
 
     @Inject(method = "read(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;Z)V", at = @At("RETURN"))
     private void superstack$clampLoadedCount(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
-        if (this.count > 64) {
+        if (this.count > 64 && SuperStackConfig.compatEnabled(SuperStackConfig.CompatPatch.CREATE)) {
             this.count = 64;
         }
     }

@@ -15,6 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class CucumberBaseItemStackHandlerMixin {
     @Inject(method = "getSlotLimit(I)I", at = @At("RETURN"), cancellable = true, remap = false)
     private void superstack$raiseSlotLimit(int slot, CallbackInfoReturnable<Integer> cir) {
-        cir.setReturnValue(SuperStackConfig.raiseCompatLimit(cir.getReturnValue()));
+        cir.setReturnValue(SuperStackConfig.raiseCompatLimit(SuperStackConfig.CompatPatch.MYSTICAL_AGRICULTURE, cir.getReturnValue()));
     }
 }

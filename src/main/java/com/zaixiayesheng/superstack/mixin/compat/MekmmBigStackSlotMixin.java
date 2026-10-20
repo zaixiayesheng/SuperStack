@@ -36,8 +36,6 @@ public abstract class MekmmBigStackSlotMixin {
      */
     @Inject(method = "getLimit(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"), cancellable = true, remap = false)
     private void superstack$capToStackSize(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-        if (cir.getReturnValue() > SuperStackConfig.maxStackSize()) {
-            cir.setReturnValue(SuperStackConfig.maxStackSize());
-        }
+        cir.setReturnValue(SuperStackConfig.mekmmSlotLimit(cir.getReturnValue()));
     }
 }
