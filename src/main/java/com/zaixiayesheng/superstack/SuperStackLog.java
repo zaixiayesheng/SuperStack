@@ -124,7 +124,8 @@ public final class SuperStackLog {
                 "appeng.util.inv.PlayerInternalInventory",
                 "appeng.util.inv.CarriedItemInventory",
                 "mekanism.common.inventory.slot.BasicInventorySlot",
-                "ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase"
+                "ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase",
+                "com.simibubi.create.content.kinetics.fan.processing.FanProcessing"
         };
         for (String target : targets) {
             try {

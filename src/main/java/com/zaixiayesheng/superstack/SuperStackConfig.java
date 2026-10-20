@@ -72,6 +72,11 @@ public final class SuperStackConfig {
             .define("raiseModdedSlotLimits", true);
 
 
+    private static final ModConfigSpec.IntValue FAN_PROCESSING_TIME_CAP = BUILDER
+            .comment("鼓风机的处理时长会按物品数量放大，这里限制它的放大倍数。默认 4，相当于按原版 64 个一组的时长处理整组。",
+                    "Cap for the fan processing time multiplier. Default 4 equals the vanilla 64-stack behaviour.")
+            .defineInRange("fanProcessingTimeCap", 4, 1, 2048);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
@@ -82,6 +87,7 @@ public final class SuperStackConfig {
     private static volatile int abbreviateFrom = 10000;
     private static volatile boolean tooltipExactCount = true;
     private static volatile boolean raiseModdedSlotLimits = true;
+    private static volatile int fanProcessingTimeCap = 4;
 
     private SuperStackConfig() {
     }
@@ -92,6 +98,10 @@ public final class SuperStackConfig {
 
     public static int compatStackLimit() {
         return compatStackLimit;
+    }
+
+    public static int fanProcessingTimeCap() {
+        return fanProcessingTimeCap;
     }
 
     public static boolean scaleSmallStacks() {
@@ -142,6 +152,7 @@ public final class SuperStackConfig {
             abbreviateFrom = ABBREVIATE_FROM.get();
             tooltipExactCount = TOOLTIP_COUNT.get();
             raiseModdedSlotLimits = RAISE_MODDED_SLOT_LIMITS.get();
+            fanProcessingTimeCap = FAN_PROCESSING_TIME_CAP.get();
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
             SuperStackLog.warn("配置尚未就绪，先使用默认值", e);

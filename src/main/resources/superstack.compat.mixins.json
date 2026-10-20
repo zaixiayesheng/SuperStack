@@ -14,7 +14,8 @@
     "SophisticatedStatefulComponentItemHandlerMixin",
     "SophisticatedInventorySorterMixin",
     "CucumberBaseItemStackHandlerMixin",
-    "MekmmBigStackSlotMixin"
+    "MekmmBigStackSlotMixin",
+    "CreateFanProcessingMixin"
   ],
   "injectors": {
     "defaultRequire": 1
