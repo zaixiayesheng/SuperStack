@@ -117,7 +117,7 @@ File: `config/superstack-common.toml`. Changes apply after a restart.
 | Option | Default | Range | Meaning |
 |---|---|---|---|
 | `maxStackSize` | 32768 | 64 to 2,147,483,647 | Item stack limit |
-| `compatStackLimit` | 2147483647 | 1 to 2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces, Mystical Agriculture); follows the stack size by default, lower it only if a mod misbehaves |
+| `compatStackLimit` | 32768 | 1 to 2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces, Mystical Agriculture); defaults to 32768, raise it together with the stack size, lower it only if a mod misbehaves |
 | `scaleSmallStacks` | true | - | Scale small stacks (16 becomes 8,192); disable to use the limit for everything |
 | `minimumStackSizeThreshold` | 1 | 0 to 64 | Items at or below this vanilla limit are not raised |
 | `countDisplay` | COMPACT | COMPACT / EXACT | How slot counts are rendered |
@@ -191,7 +191,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - Ground item stacks merge up to the configured limit without overflowing: counts are added as long, and the hard-coded 64 inside vanilla `merge` now uses the config. Measured: 1.5e9 + 5e8 merges into 2e9, while 1.5e9 + 1.5e9 stays as two stacks.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64 to 2,147,483,647 instead of 64 to 1,000,000. The default stays 32,768.
 - Bulk crafting accounts with long all the way: ingredients, output and returned items are chunked by their own limits, so a single slot holding two billion items cannot lose anything to int overflow.
-- Compat slot limit no longer imposes a separate ceiling: `compatStackLimit` follows the stack size by default, so modded machine slots accept the same large stacks; lower it for mods that treat the limit as an array length.
+- `compatStackLimit` now defaults to 32768, matching the default stack size, so supported mods' machine slots accept the same stacks by default; raise it if you also raise the stack size, lower it for mods that treat the limit as an array length.
 - More Machine large-stack slots: the "multiply by 8" path uses saturating multiplication and the result is capped at the configured stack limit (it used to reach 262,144, beyond the item limit, and got truncated on save).
 - Mystical Agriculture / Automation: Cucumber's shared slot default of 64 now uses the compat limit, so infusion machines accept large stacks; slots with an explicit limit keep it.
 - Sophisticated Core: sorting no longer runs when same-item totals exceed int; it used to overflow into a negative number and wipe both stacks.

@@ -21,7 +21,7 @@ public final class SuperStackConfig {
     /** 配置还没加载时的兜底值，跟默认值保持一致。 */
     public static final int DEFAULT_MAX_STACK_SIZE = 32768;
     /** 联动模组看到的槽位上限：默认不额外限制，跟随堆叠上限；遇到第三方溢出时再单独调低。 */
-    public static final int DEFAULT_COMPAT_STACK_LIMIT = Integer.MAX_VALUE;
+    public static final int DEFAULT_COMPAT_STACK_LIMIT = 32768;
 
     /** 原版的默认堆叠上限，缩放比例以它为基准。 */
     public static final int VANILLA_MAX_STACK_SIZE = 64;
@@ -31,20 +31,24 @@ public final class SuperStackConfig {
     private static final ModConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
             .comment("物品的堆叠上限。原版是 64，默认 32768，上限 2147483647。改完需要重启游戏。",
                     "The new stack size limit for items. Vanilla is 64, default 32768, upper bound Integer.MAX_VALUE (2147483647). Restart required after changing.")
+            .translation("superstack.configuration.maxStackSize")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, Integer.MAX_VALUE);
     private static final ModConfigSpec.IntValue COMPAT_STACK_LIMIT = BUILDER
-            .comment("联动模组（通用机械、应用能源、精妙、更多熔炉、神秘农业）看到的槽位上限。默认跟随堆叠上限；只有当某个模组把槽位上限当数组长度或拿去做乘法、导致异常时，才需要把它调低。",
+            .comment("联动模组（通用机械、应用能源、精妙、更多熔炉、神秘农业）看到的槽位上限。默认 32768，与默认堆叠上限一致；把最大堆叠调得更高时，这里也要跟着调，否则那些机器的槽位仍停在 32768。只要模组自己声明的上限大于 64/99，就不受这一项影响。",
                     "Slot limit exposed to supported mods. Deliberately lower than the stack size; raise it only if you know those mods handle huge values.")
+            .translation("superstack.configuration.compatStackLimit")
             .defineInRange("compatStackLimit", DEFAULT_COMPAT_STACK_LIMIT, 1, Integer.MAX_VALUE);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
             .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",
                     "关掉的话所有物品统一用 maxStackSize。",
                     "Whether items with smaller vanilla stack sizes (eg. ender pearls) are scaled proportionally.")
+            .translation("superstack.configuration.scaleSmallStacks")
             .define("scaleSmallStacks", true);
 
     private static final ModConfigSpec.IntValue MIN_THRESHOLD = BUILDER
             .comment("原版上限不超过这个值的物品不放大。默认 1，也就是只有原本只能堆 1 个的物品（工具、桶之类）保持不变。")
+            .translation("superstack.configuration.minimumStackSizeThreshold")
             .defineInRange("minimumStackSizeThreshold", 1, 0, 64);
 
     private static final ModConfigSpec.EnumValue<CountDisplay> COUNT_DISPLAY = BUILDER
@@ -52,15 +56,18 @@ public final class SuperStackConfig {
                     "COMPACT —— 超过门槛后换成单位缩写（12.3k、1.23m），和精妙背包一致，默认；",
                     "EXACT —— 一律显示精确数字（缩放到塞得下为止）。",
                     "两种方式都能在提示框里看到精确数量。")
+            .translation("superstack.configuration.countDisplay")
             .defineEnum("countDisplay", CountDisplay.COMPACT);
 
     private static final ModConfigSpec.IntValue ABBREVIATE_FROM = BUILDER
             .comment("数量达到多少开始用单位缩写。默认 10000（也就是 1000~9999 还是显示 1,234 这种精确写法，和精妙背包一致）。",
                     "想让它从 1000 就开始缩写就填 1000。")
+            .translation("superstack.configuration.abbreviateFrom")
             .defineInRange("abbreviateFrom", 10000, 1000, 1_000_000);
 
     private static final ModConfigSpec.BooleanValue TOOLTIP_COUNT = BUILDER
             .comment("鼠标悬停时在提示框里显示精确数量（数量超过 99 才显示）。")
+            .translation("superstack.configuration.tooltipExactCount")
             .define("tooltipExactCount", true);
 
     private static final ModConfigSpec.BooleanValue RAISE_MODDED_SLOT_LIMITS = BUILDER
@@ -69,12 +76,14 @@ public final class SuperStackConfig {
                     "如果这个槽位上限还停在自己的默认值（NeoForge 的是 99），大堆叠就会在整理时被截断丢掉。",
                     "实测：10000 的堆叠 + 精妙整理整理背包，关掉这项会从 270000 掉到 2673，打开则一个不少。",
                     "如果有机器因此拒收物品，再把它关掉。")
+            .translation("superstack.configuration.raiseModdedSlotLimits")
             .define("raiseModdedSlotLimits", true);
 
 
     private static final ModConfigSpec.IntValue FAN_PROCESSING_VIRTUAL_STACK_SIZE = BUILDER
             .comment("鼓风机的处理时长按「这一堆算多少个」来计算，原版公式是 (数量-1)/16+1。这里给参与计算的数量加一个上限：堆叠不超过它时用真实数量（与原版一致），超过它时按它计算。64 等于原版一组的速度，调小更快，1 最快。",
                     "The fan processing time is computed from a stack count with the vanilla formula (count-1)/16+1. This value caps the count used: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. 64 equals the vanilla 64-stack speed, lower is faster, 1 is the fastest.")
+            .translation("superstack.configuration.fanProcessingVirtualStackSize")
             .defineInRange("fanProcessingVirtualStackSize", 64, 1, 64);
 
     static final ModConfigSpec SPEC = BUILDER.build();
