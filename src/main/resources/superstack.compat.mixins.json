@@ -10,6 +10,7 @@
     "InvWrapperMixin",
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
+    "Ae2ItemKeyMixin",
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
     "IronFurnacesFurnaceTileMixin",
