@@ -115,7 +115,7 @@ The file is `config/superstack-common.toml`; restart after editing.
 | Option | Default | Range | Meaning |
 |---|---|---|---|
 | `maxStackSize` | 32768 | 64–2,147,483,647 | Item stack limit |
-| `compatStackLimit` | 1000000 | 64–2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces); kept below the stack size so third-party arithmetic cannot overflow |
+| `compatStackLimit` | 32768 | 64–2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces); same as the stack size by default; raise it with the stack size when you need bigger modded slots, but keep it moderate since some mods use the value as an array size or multiplier |
 | `scaleSmallStacks` | true | — | Scale small stacks (16 → 8,192); disable to use the limit for everything |
 | `minimumStackSizeThreshold` | 1 | 0–64 | Items at or below this vanilla limit are not raised |
 | `countDisplay` | COMPACT | COMPACT / EXACT | Slot count rendering style |
@@ -186,9 +186,9 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ### 21.1-1.0.6
 
-- Mystical Agriculture and Mystical Automation: their shared Cucumber library defaulted every slot to 64; slots now use the compat limit (1,000,000 by default), so the infuser and other machines accept large stacks. Slots with an explicit limit keep it.
+- Mystical Agriculture and Mystical Automation: their shared Cucumber library defaulted every slot to 64; slots now use the compat limit (32,768 by default), so the infuser and other machines accept large stacks. Slots with an explicit limit keep it.
 - Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
-- Slot limits exposed to supported mods now come from `compatStackLimit` (1,000,000 by default), so third-party code cannot overflow or allocate by the raw stack size.
+- Slot limits exposed to supported mods now come from `compatStackLimit` (32,768 by default), so a modest value keeps modded slots working; raise it alongside the stack size if needed.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
 - Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
 - Ground item merging is guarded: two big stacks no longer take part in vanilla's 64-per-step merge, which could overflow the added counts; stacks of 64 or less merge as before.
