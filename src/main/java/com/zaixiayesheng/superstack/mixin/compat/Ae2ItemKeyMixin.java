@@ -35,9 +35,12 @@ public abstract class Ae2ItemKeyMixin {
             return stack;
         }
         ItemStack copy = stack.copy();
-        copy.remove(DataComponents.MAX_STACK_SIZE);
+        // 不能直接 remove：PatchedDataComponentMap#remove 会在补丁里写一个「已移除」标记，
+        // 把物品默认值也一起盖掉，getMaxStackSize 会退化成 1。写回「与默认值相同」的值，
+        // set 内部会把补丁条目删掉，等于干净地回到默认值。
+        copy.set(DataComponents.MAX_STACK_SIZE, copy.getItem().getDefaultMaxStackSize());
         if (SuperStackLog.isDebugEnabled()) {
-            SuperStackLog.debug("AE 堆叠归一化：" + stack.getItem() + " 移除显式上限 64，改由默认值 "
+            SuperStackLog.debug("AE 堆叠归一化：" + stack.getItem() + " 清除显式上限 64，改由默认值 "
                     + copy.getMaxStackSize() + " 生效");
         }
         return copy;
