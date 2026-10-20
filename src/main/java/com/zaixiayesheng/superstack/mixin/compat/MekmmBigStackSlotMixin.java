@@ -1,8 +1,12 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
+import com.zaixiayesheng.superstack.SuperStackConfig;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Mekanism: MoreMachine exposes a few "big stack" slots that multiply the parent limit by 8 with
@@ -23,5 +27,17 @@ public abstract class MekmmBigStackSlotMixin {
     private int superstack$saturatingMultiply(int left, int right) {
         long result = (long) left * (long) right;
         return (int) Math.min(result, (long) Integer.MAX_VALUE);
+    }
+
+    /**
+     * Keep the x8 slots within the configured stack size. A slot holding more than one item stack's worth
+     * would be written to NBT with a count the item stack codec rejects, so the surplus would be lost on
+     * reload.
+     */
+    @Inject(method = "getLimit(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"), cancellable = true, remap = false)
+    private void superstack$capToStackSize(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+        if (cir.getReturnValue() > SuperStackConfig.maxStackSize()) {
+            cir.setReturnValue(SuperStackConfig.maxStackSize());
+        }
     }
 }
