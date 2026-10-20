@@ -24,7 +24,7 @@ public final class SuperStackConfig {
     public static final int DEFAULT_COMPAT_STACK_LIMIT = Integer.MAX_VALUE;
 
     /** 原版的默认堆叠上限，缩放比例以它为基准。 */
-    private static final int VANILLA_MAX_STACK_SIZE = 64;
+    public static final int VANILLA_MAX_STACK_SIZE = 64;
 
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
