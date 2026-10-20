@@ -20,6 +20,8 @@ import java.util.TreeSet;
 public final class SuperStackConfig {
     /** 配置还没加载时的兜底值，跟默认值保持一致。 */
     public static final int DEFAULT_MAX_STACK_SIZE = 32768;
+    /** 联动模组看到的槽位上限：默认与堆叠上限一致，需要更大时单独调高。 */
+    public static final int DEFAULT_COMPAT_STACK_LIMIT = DEFAULT_MAX_STACK_SIZE;
 
     /** 原版的默认堆叠上限，缩放比例以它为基准。 */
     private static final int VANILLA_MAX_STACK_SIZE = 64;
@@ -33,7 +35,7 @@ public final class SuperStackConfig {
     private static final ForgeConfigSpec.IntValue COMPAT_STACK_LIMIT = BUILDER
             .comment("联动模组（通用机械、应用能源、精妙、更多熔炉）看到的槽位上限。默认 1000000，比堆叠上限低，避免第三方把槽位上限当数组长度或做乘法时溢出。",
                     "Slot limit exposed to supported mods. Deliberately lower than the stack size; raise it only if you know those mods handle huge values.")
-            .defineInRange("compatStackLimit", 1_000_000, 64, Integer.MAX_VALUE);
+            .defineInRange("compatStackLimit", DEFAULT_COMPAT_STACK_LIMIT, 64, Integer.MAX_VALUE);
 
     private static final ForgeConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
             .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",
@@ -71,7 +73,7 @@ public final class SuperStackConfig {
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
-    private static volatile int compatStackLimit = 1_000_000;
+    private static volatile int compatStackLimit = DEFAULT_COMPAT_STACK_LIMIT;
     private static volatile boolean scaleSmallStacks = true;
     private static volatile int minimumStackSizeThreshold = 1;
     private static volatile CountDisplay countDisplay = CountDisplay.COMPACT;
