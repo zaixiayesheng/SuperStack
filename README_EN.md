@@ -186,6 +186,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ### 21.1-1.0.6
 
+- Mystical Agriculture and Mystical Automation: their shared Cucumber library defaulted every slot to 64; slots now use the compat limit (1,000,000 by default), so the infuser and other machines accept large stacks. Slots with an explicit limit keep it.
 - Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
 - Slot limits exposed to supported mods now come from `compatStackLimit` (1,000,000 by default), so third-party code cannot overflow or allocate by the raw stack size.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.

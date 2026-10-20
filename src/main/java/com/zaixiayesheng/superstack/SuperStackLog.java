@@ -116,6 +116,7 @@ public final class SuperStackLog {
         String[] targets = {
                 "net.p3pp3rf1y.sophisticatedcore.util.InventorySorter",
                 "net.p3pp3rf1y.sophisticatedcore.inventory.StatefulComponentItemHandler",
+                "com.blakebr0.cucumber.inventory.BaseItemStackHandler",
                 "appeng.util.inv.AppEngInternalInventory",
                 "appeng.menu.slot.AppEngSlot",
                 "appeng.util.inv.PlayerInternalInventory",

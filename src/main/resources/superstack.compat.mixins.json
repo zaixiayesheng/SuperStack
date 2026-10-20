@@ -12,7 +12,8 @@
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
     "SophisticatedStatefulComponentItemHandlerMixin",
-    "SophisticatedInventorySorterMixin"
+    "SophisticatedInventorySorterMixin",
+    "CucumberBaseItemStackHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
