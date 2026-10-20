@@ -194,6 +194,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - Mystical Agriculture and Mystical Automation: their shared Cucumber library defaulted every slot to 64; slots now use the compat limit, so the infuser and other machines accept large stacks. Slots with an explicit limit keep it.
 - Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
 - Create fans: processing time no longer scales with the real stack size without limit. The count used is capped by `fanProcessingVirtualStackSize` (default 64): small stacks keep their real count and behave exactly like vanilla, large stacks are treated as 64. A 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
+- Applied Energistics 2: stack sizes taken from terminals and split out of storage follow the configured limit. AE caches the limit as an int inside `AEItemKey` when the key is created, so items whose key predates the raise (for example sand from a drawer) were clamped back to 64; the getter now returns the configured value.
 - Verified: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt keep their counts across a save and reload; two two-billion stacks next to each other do not merge.
 
 <details>
