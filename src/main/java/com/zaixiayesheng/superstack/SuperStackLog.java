@@ -120,6 +120,7 @@ public final class SuperStackLog {
                 "com.jerry.meklm.common.inventory.slot.BigStackInputInventorySlot",
                 "com.jerry.meklm.common.inventory.slot.BigStackOutputInventorySlot",
                 "appeng.util.inv.AppEngInternalInventory",
+                "appeng.api.stacks.AEItemKey",
                 "appeng.menu.slot.AppEngSlot",
                 "appeng.util.inv.PlayerInternalInventory",
                 "appeng.util.inv.CarriedItemInventory",
