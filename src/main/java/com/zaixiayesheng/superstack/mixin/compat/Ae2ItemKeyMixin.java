@@ -25,7 +25,7 @@ public abstract class Ae2ItemKeyMixin {
         return original == SuperStackConfig.VANILLA_MAX_STACK_SIZE ? SuperStackConfig.maxStackSize() : original;
     }
 
-    @ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true, require = 0)
     private static ItemStack superstack$normalizeMaxStackSize(ItemStack stack) {
         if (stack.isEmpty() || stack.getMaxStackSize() != SuperStackConfig.VANILLA_MAX_STACK_SIZE) {
             return stack;
