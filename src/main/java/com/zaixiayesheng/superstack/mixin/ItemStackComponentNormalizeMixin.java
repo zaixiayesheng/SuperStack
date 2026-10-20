@@ -17,10 +17,11 @@ import java.util.Optional;
 /**
  * 修复早期测试版在存档里留下的、被写死的堆叠上限。
  *
- * <p>只认两种由本模组早期版本留下的痕迹，其它情况一律不动：
+ * <p>只认三种由本模组早期版本留下的痕迹，其它情况一律不动：
  * <ul>
  *   <li>堆叠上带了一个<b>显式 64</b> 的 {@code max_stack_size} 补丁（早期版本把原版 64 写进了物品）；</li>
- *   <li>补丁里是<b>「已移除」标记</b>（早期版本用 {@code remove} 删组件，反而把上限盖成了 1）。</li>
+ *   <li>补丁里是<b>「已移除」标记</b>（早期版本用 {@code remove} 删组件，反而把上限盖成了 1）；</li>
+ *   <li>显式值<b>正好等于</b>物品当前的默认上限（早期版本把 32768 写进了物品，与没有这条组件等价）。</li>
  * </ul>
  * 数据包或其它模组主动设成 1、16、32 这类上限不受影响。
  *
@@ -43,8 +44,14 @@ public abstract class ItemStackComponentNormalizeMixin {
         cir.setReturnValue(SuperStackConfig.maxStackSize());
     }
 
+    private static final ThreadLocal<Boolean> SUPERSTACK_COMPARING = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
     @Inject(method = "isSameItemSameComponents", at = @At("HEAD"), cancellable = true)
     private static void superstack$compareNormalized(ItemStack stack, ItemStack other, CallbackInfoReturnable<Boolean> cir) {
+        // 归一后再比会重新进本方法，用标志位挡住，避免递归。
+        if (SUPERSTACK_COMPARING.get()) {
+            return;
+        }
         if (!stack.is(other.getItem())) {
             cir.setReturnValue(false);
             return;
@@ -57,8 +64,12 @@ public abstract class ItemStackComponentNormalizeMixin {
         }
         ItemStack a = superstack$normalized(stack);
         ItemStack b = superstack$normalized(other);
-        // 归一后两份都没有该补丁，再次进入本方法会直接走原版逻辑。
-        cir.setReturnValue(ItemStack.isSameItemSameComponents(a, b));
+        SUPERSTACK_COMPARING.set(Boolean.TRUE);
+        try {
+            cir.setReturnValue(ItemStack.isSameItemSameComponents(a, b));
+        } finally {
+            SUPERSTACK_COMPARING.set(Boolean.FALSE);
+        }
     }
 
     /**
@@ -72,26 +83,40 @@ public abstract class ItemStackComponentNormalizeMixin {
     }
 
     /**
-     * 这份堆叠是否带着早期版本留下的痕迹：显式 64，或者「已移除」标记。
+     * 这份堆叠是否带着早期版本留下的痕迹：显式 64、显式写入的本模组默认值，或者「已移除」标记。
+     *
+     * <p>只看 {@code getComponentsPatch()}：只有真正挂在这份堆叠上的补丁才算痕迹。
+     * 干净堆叠即便取了物品默认值，补丁集里也没有这一条，不会被误判。
      */
     private static boolean superstack$hasStaleLimit(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
-        }
-        if (stack.has(DataComponents.MAX_STACK_SIZE)) {
-            Integer value = stack.get(DataComponents.MAX_STACK_SIZE);
-            return value != null && value == SuperStackConfig.VANILLA_MAX_STACK_SIZE;
         }
         DataComponentPatch patch = stack.getComponentsPatch();
         if (patch.isEmpty()) {
             return false;
         }
         for (Map.Entry<DataComponentType<?>, ?> entry : patch.entrySet()) {
-            if (entry.getKey() == DataComponents.MAX_STACK_SIZE) {
-                // 组件列表里没有它、补丁里却有：这是「已移除」标记。
-                Object value = entry.getValue();
-                return value instanceof Optional<?> optional && optional.isEmpty();
+            if (entry.getKey() != DataComponents.MAX_STACK_SIZE) {
+                continue;
             }
+            Object raw = entry.getValue();
+            if (!(raw instanceof Optional<?> optional)) {
+                return false;
+            }
+            if (optional.isEmpty()) {
+                // 组件列表里没有它、补丁里却是空值：这是「已移除」标记。
+                return true;
+            }
+            if (!(optional.get() instanceof Integer value)) {
+                return false;
+            }
+            if (value == SuperStackConfig.VANILLA_MAX_STACK_SIZE) {
+                return true;
+            }
+            // 显式写成本模组的默认上限：语义上等于没有这条组件。
+            return value == SuperStackConfig.maxStackSize()
+                    && stack.getItem().getDefaultMaxStackSize() == value;
         }
         return false;
     }

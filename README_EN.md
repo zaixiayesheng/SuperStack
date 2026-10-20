@@ -172,7 +172,7 @@ This mod changes saved data. Back up your world, or test it in a copy first.
 | `BulkCraftMath` | Pure arithmetic: availability, crafts, output, space, chunking, conservation checks, with JUnit tests |
 | `ContainersDropStackMixin` | Large stacks drop as a single entity when a container is broken |
 | `ItemEntityMergeGuardMixin` | Merges use long arithmetic and the configured limit instead of the hard-coded 64 |
-| `ItemStackComponentNormalizeMixin` | Normalises the stale `max_stack_size` variants left by earlier versions, including in hashing |
+| `ItemStackComponentNormalizeMixin` | Normalises the stale `max_stack_size` variants left by earlier versions (explicit 64, removal marker, or an explicit copy of the configured limit), including in hashing |
 | `GuiGraphicsMixin` / `CountFormat` | Abbreviated, scaled count rendering |
 | `ClientEvents` | Adds the "current / limit" tooltip line |
 | `mixin/compat/*` | Per-mod slot patches in a separate config, skipped when the mod is absent |
