@@ -11,11 +11,11 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
  * 应用能源的 {@code AEItemKey} 在创建时把整份 ItemStack 存下来，取货时直接 copyWithCount。
- * 如果这个 key 是本模组抬高上限之前创建的，那份 stack 的 max_stack_size 组件仍是 64，于是：
- * 取货只能 64 个；取出来的物品和正常物品组件不同，合并时客户端乐观叠成 128、服务端再拆回 64。
+ * 如果这个 key 是本模组抬高上限之前创建的，那份 stack 里带着显式的「max_stack_size = 64」组件：
+ * 取货只能 64 个，而且和正常物品组件不同，合并时客户端乐观叠成 128、服务端再拆回 64。
  *
- * <p>这里既让 getMaxStackSize 跟随配置，也在 key 创建时把 64 的组件归一成配置值，
- * 保证 AE 取出的堆叠和普通堆叠完全一致。
+ * <p>处理方式是<b>删掉</b>这个显式组件，让物品自身的默认值生效，而不是写一个新的组件值。
+ * 这样 AE 存下来的 NBT 与普通物品完全一致（没有多余的组件补丁），卸掉本模组也不会读不出来。
  */
 @Mixin(targets = "appeng.api.stacks.AEItemKey", remap = false)
 public abstract class Ae2ItemKeyMixin {
@@ -30,10 +30,15 @@ public abstract class Ae2ItemKeyMixin {
         if (stack.isEmpty() || stack.getMaxStackSize() != SuperStackConfig.VANILLA_MAX_STACK_SIZE) {
             return stack;
         }
+        if (!stack.has(DataComponents.MAX_STACK_SIZE)) {
+            // 没有显式组件，说明拿到的就是物品默认值，不需要动。
+            return stack;
+        }
         ItemStack copy = stack.copy();
-        copy.set(DataComponents.MAX_STACK_SIZE, SuperStackConfig.maxStackSize());
+        copy.remove(DataComponents.MAX_STACK_SIZE);
         if (SuperStackLog.isDebugEnabled()) {
-            SuperStackLog.debug("AE 堆叠归一化：" + stack.getItem() + " 64 → " + SuperStackConfig.maxStackSize());
+            SuperStackLog.debug("AE 堆叠归一化：" + stack.getItem() + " 移除显式上限 64，改由默认值 "
+                    + copy.getMaxStackSize() + " 生效");
         }
         return copy;
     }
