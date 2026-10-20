@@ -11,38 +11,34 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * 修复历史存档里被写成「显式 max_stack_size」的物品。
+ * 修复早期测试版在存档里留下的、被写死的堆叠上限。
  *
- * <p>1.0.6 早期的测试版在应用能源的键里写死过上限，也出现过「把组件删掉」的写法：删除会在组件补丁里
- * 留下一个「已移除」标记，把物品默认值一起盖掉，读取时上限变成 1。结果是同一物品在存档里出现几种
- * 互不相等的身影（32768 / 64 / 1），彼此不能合并，其中一种还只能一个个取。
- *
- * <p>这里不改存档，只在读取时纠正行为：
+ * <p>只认两种由本模组早期版本留下的痕迹，其它情况一律不动：
  * <ul>
- *   <li>上限：只要这份堆叠带着 max_stack_size 补丁（无论是显式值还是「已移除」标记），且解析出来的
- *       上限不超过原版 64，就按配置值返回。</li>
- *   <li>身份：比较两份堆叠是否同一种物品时，先把这类补丁归一回物品默认值再比，让历史遗留的几种
+ *   <li>堆叠上带了一个<b>显式 64</b> 的 {@code max_stack_size} 补丁（早期版本把原版 64 写进了物品）；</li>
+ *   <li>补丁里是<b>「已移除」标记</b>（早期版本用 {@code remove} 删组件，反而把上限盖成了 1）。</li>
+ * </ul>
+ * 数据包或其它模组主动设成 1、16、32 这类上限不受影响。
+ *
+ * <p>处理方式不改存档，只在读取时纠正：
+ * <ul>
+ *   <li>上限：这两种痕迹存在时按配置上限返回。</li>
+ *   <li>身份：比较两份堆叠是否同一种物品时，先把这类痕迹归一回物品默认值再比，让历史遗留的几种
  *       身影重新算作同一种，能正常合并、也能在应用能源里并成一个键。</li>
  * </ul>
- * 对没有这类补丁的普通堆叠（绝大多数）走原版逻辑，不做任何额外处理。
  */
 @Mixin(ItemStack.class)
 public abstract class ItemStackComponentNormalizeMixin {
 
     @Inject(method = "getMaxStackSize", at = @At("RETURN"), cancellable = true)
     private void superstack$repairStaleLimit(CallbackInfoReturnable<Integer> cir) {
-        int original = cir.getReturnValue();
         ItemStack self = (ItemStack) (Object) this;
-
-        if (original > SuperStackConfig.VANILLA_MAX_STACK_SIZE) {
+        if (!superstack$hasStaleLimit(self)) {
             return;
         }
-        if (self.isEmpty() || !superstack$hasMaxStackSizePatch(self)) {
-            return;
-        }
-
         cir.setReturnValue(SuperStackConfig.maxStackSize());
     }
 
@@ -55,8 +51,7 @@ public abstract class ItemStackComponentNormalizeMixin {
         if (stack.isEmpty() || other.isEmpty()) {
             return;
         }
-        if (!superstack$hasMaxStackSizePatch(stack) && !superstack$hasMaxStackSizePatch(other)) {
-
+        if (!superstack$hasStaleLimit(stack) && !superstack$hasStaleLimit(other)) {
             return;
         }
         ItemStack a = superstack$normalized(stack);
@@ -65,14 +60,26 @@ public abstract class ItemStackComponentNormalizeMixin {
         cir.setReturnValue(ItemStack.isSameItemSameComponents(a, b));
     }
 
-    private static boolean superstack$hasMaxStackSizePatch(ItemStack stack) {
+    /**
+     * 这份堆叠是否带着早期版本留下的痕迹：显式 64，或者「已移除」标记。
+     */
+    private static boolean superstack$hasStaleLimit(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        if (stack.has(DataComponents.MAX_STACK_SIZE)) {
+            Integer value = stack.get(DataComponents.MAX_STACK_SIZE);
+            return value != null && value == SuperStackConfig.VANILLA_MAX_STACK_SIZE;
+        }
         DataComponentPatch patch = stack.getComponentsPatch();
         if (patch.isEmpty()) {
             return false;
         }
         for (Map.Entry<DataComponentType<?>, ?> entry : patch.entrySet()) {
             if (entry.getKey() == DataComponents.MAX_STACK_SIZE) {
-                return true;
+                // 组件列表里没有它、补丁里却有：这是「已移除」标记。
+                Object value = entry.getValue();
+                return value instanceof Optional<?> optional && optional.isEmpty();
             }
         }
         return false;
