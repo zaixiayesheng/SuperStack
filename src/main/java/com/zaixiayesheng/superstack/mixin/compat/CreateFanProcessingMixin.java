@@ -41,7 +41,7 @@ public abstract class CreateFanProcessingMixin {
 
     private static int superstack$cappedCount(ItemStack stack) {
         int count = stack.getCount();
-        int virtualCount = SuperStackConfig.fanProcessingVirtualStackSize();
+        int virtualCount = SuperStackConfig.fanStackCount();
         return count < virtualCount ? count : virtualCount;
     }
 }

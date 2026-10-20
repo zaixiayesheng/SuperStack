@@ -17,7 +17,7 @@ public final class ModBusEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onModifyDefaultComponents(ModifyDefaultComponentsEvent event) {
         int max = SuperStackConfig.maxStackSize();
-        int threshold = SuperStackConfig.minimumStackSizeThreshold();
+        int threshold = SuperStackConfig.keepUnstackable() ? 1 : 0;
 
         // 边改边统计。这里报的是「真正生效的结果」，不是我们以为会生效的结果
         int[] unchanged = {0};
@@ -56,7 +56,7 @@ public final class ModBusEvents {
     private static void logApplied(int changed, int unchanged, Set<Integer> scaledBelowMax, int max) {
         if (changed == 0) {
             SuperStackLog.warn("没有物品的堆叠上限被改动：检查一下 maxStackSize（当前 " + max
-                    + "）和 minimumStackSizeThreshold 是不是把范围卡没了。");
+                    + "）和 keepUnstackable 是不是把范围卡没了。");
             return;
         }
 

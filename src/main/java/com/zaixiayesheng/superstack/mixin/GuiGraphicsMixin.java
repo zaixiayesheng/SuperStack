@@ -56,7 +56,7 @@ public abstract class GuiGraphicsMixin {
             return original.call(graphics, font, text, x, y, color, dropShadow);
         }
 
-        String display = SuperStackConfig.countDisplay() == SuperStackConfig.CountDisplay.COMPACT
+        String display = SuperStackConfig.countStyle() == SuperStackConfig.CountDisplay.COMPACT
                 ? CountFormat.compact(count)
                 : CountFormat.exact(count);
 

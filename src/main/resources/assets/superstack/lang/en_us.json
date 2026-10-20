@@ -1,14 +1,14 @@
 {
-  "superstack.tooltip.count": "Count: %s / %s",
   "superstack.configuration.title": "SuperStack Settings",
   "superstack.configuration.section.superstack.common.toml": "General",
-  "superstack.configuration.maxStackSize": "Maximum stack size",
-  "superstack.configuration.compatStackLimit": "Slot limit for supported mods",
-  "superstack.configuration.scaleSmallStacks": "Scale smaller stacks proportionally",
-  "superstack.configuration.minimumStackSizeThreshold": "Do not raise stacks at or below this size",
-  "superstack.configuration.countDisplay": "Count display",
-  "superstack.configuration.abbreviateFrom": "Abbreviate from",
-  "superstack.configuration.tooltipExactCount": "Exact count in tooltip",
-  "superstack.configuration.raiseModdedSlotLimits": "Raise other mods' slot limits",
-  "superstack.configuration.fanProcessingVirtualStackSize": "Count used by fans"
+  "superstack.configuration.basic": "Basics",
+  "superstack.configuration.advanced": "Advanced",
+  "superstack.configuration.maxStackSize": "Stack size",
+  "superstack.configuration.scaleSmallItems": "Scale smaller stacks",
+  "superstack.configuration.keepUnstackable": "Keep single items at one",
+  "superstack.configuration.countStyle": "Count style",
+  "superstack.configuration.abbreviateAbove": "Abbreviate above",
+  "superstack.configuration.tooltipExact": "Exact count in tooltip",
+  "superstack.configuration.otherModSlots": "Widen other mods' slots",
+  "superstack.configuration.fanStackCount": "Count used by fans"
 }

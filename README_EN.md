@@ -55,8 +55,8 @@ The limit defaults to 32,768 (configurable 64 to 1,000,000). Small stacks scale 
 The multiplier is fixed at `maxStackSize / 64`, so x512 by default. Rules:
 
 - Items with durability (tools, armour, Meka gear) are not changed.
-- Items whose vanilla limit is at or below `minimumStackSizeThreshold` (1 by default) are not changed.
-- With `scaleSmallStacks` disabled, every item uses `maxStackSize`.
+- With `keepUnstackable` on, tools, buckets and other one-per-slot items stay at one.
+- With `scaleSmallItems` disabled, every item uses `maxStackSize`.
 - The limit itself can be configured all the way up to 2,147,483,647; 32,768 is only a conservative default.
 
 Saved data and network sync are rewritten as well: counts embedded in items (for example the 9 slots carried by an upgrade item) are stored as an int and synced as a VarInt, so 32,768 survives a save and reload.
@@ -97,7 +97,7 @@ A stack larger than 128 drops as **one** item entity. Otherwise vanilla splits i
 
 ## Slot compatibility
 
-Vanilla containers follow automatically. Other mods fall into two groups: those extending `Slot` / `Container` follow, and those with their own inventory interfaces are raised by `raiseModdedSlotLimits` (raise only, never lower).
+Vanilla containers follow automatically. Other mods fall into two groups: those extending `Slot` / `Container` follow, and those with their own inventory interfaces are raised by `otherModSlots` (raise only, never lower).
 
 | Mod | Version | What was fixed |
 |---|---|---|
@@ -116,15 +116,16 @@ File: `config/superstack-common.toml`. Changes apply after a restart.
 
 | Option | Default | Range | Meaning |
 |---|---|---|---|
-| `maxStackSize` | 32768 | 64 to 2,147,483,647 | Item stack limit |
-| `compatStackLimit` | 32768 | 1 to 2,147,483,647 | Slot limit shown to supported mods (Mekanism, AE2, Sophisticated, Iron Furnaces, Mystical Agriculture); defaults to 32768, raise it together with the stack size, lower it only if a mod misbehaves |
-| `scaleSmallStacks` | true | - | Scale small stacks (16 becomes 8,192); disable to use the limit for everything |
-| `minimumStackSizeThreshold` | 1 | 0 to 64 | Items at or below this vanilla limit are not raised |
-| `countDisplay` | COMPACT | COMPACT / EXACT | How slot counts are rendered |
-| `abbreviateFrom` | 10000 | 1,000 to 1,000,000 | Where abbreviations start |
-| `tooltipExactCount` | true | - | Show the exact count in tooltips |
-| `raiseModdedSlotLimits` | true | - | Raise slot limits of other mods |
-| `fanProcessingVirtualStackSize` | 64 | 1 to 64 | Upper bound on the count Create fans use when computing processing time: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. Vanilla formula is `(count-1)/16+1`; 64 equals the vanilla 64-stack speed, lower is faster, 1 is fastest |
+| `maxStackSize` | 32768 | 64 to 2,147,483,647 | Items per slot; restart after changing |
+| `scaleSmallItems` | true | on / off | Items that stack below 64 (ender pearls, eggs) scale up too |
+| `keepUnstackable` | true | on / off | Keep tools, buckets and armour at one per slot |
+| `countStyle` | COMPACT | COMPACT / EXACT | Abbreviate slot counts (12.3k) or always draw the full number |
+| `abbreviateAbove` | 10000 | 1,000 to 1,000,000 | Count from which abbreviations start |
+| `tooltipExact` | true | on / off | Show the exact count on the tooltip |
+| `otherModSlots` | true | on / off | Widen other mods' slot limits so sorting does not truncate stacks |
+| `fanStackCount` | 64 | 1 to 64 | Stack count used for Create fan processing time (not present on 1.20.1) |
+
+Only the first option needs attention; `compatStackLimit` is gone and supported mods' slot limits now follow `maxStackSize` directly. The first three live under `[basic]`, the rest under `[advanced]`.
 
 Comments inside the generated config file follow the JVM language: Chinese or English, falling back to Chinese for other locales. Force one with `-Dsuperstack.config.lang=zh` or `=en`. An existing `superstack-common.toml` is not rewritten automatically; delete it to regenerate the comments in the new language.
 
@@ -137,7 +138,7 @@ Stacks above the vanilla limit are rejected when loading; the log records `Tried
 The client still shows and works with 64, and the server rejects the overflow, which looks like "clicking does nothing". Install on both sides.
 
 **Why is a stack not 32,768?**
-Items with a 16 limit scale to 8,192. Disable `scaleSmallStacks` to make everything use the limit.
+Items with a 16 limit scale to 8,192. Disable `scaleSmallItems` to make everything use the limit.
 
 **Why can I not see this mod's count overlay in Sophisticated screens?**
 Sophisticated draws abbreviated counts itself, so this mod steps aside in those screens.
@@ -155,7 +156,7 @@ Creative tabs group by component value, so each item still has a single entry af
 | Vanilla containers / hoppers / furnaces | Follow the configured limit |
 | KubeJS | Its `remove_slot_limit` passes values through and does not push the limit back down |
 | Inventory sorting mods | Read `ItemStack.getMaxStackSize()`; whatever does not fit stays where it was |
-| Sophisticated "sort inventory" | Has its own "do not exceed the item limit" guard; measured with `maxStackSize = 10000` and 27 slots: with `raiseModdedSlotLimits` off 270000 became 2673, with it on 270000 stayed 270000 |
+| Sophisticated "sort inventory" | Has its own "do not exceed the item limit" guard; measured with `maxStackSize = 10000` and 27 slots: with `otherModSlots` off 270000 became 2673, with it on 270000 stayed 270000 |
 | Immersive Engineering / EnderIO / Create | These ship their own inventory interfaces with hard-coded limits, which this mod leaves alone |
 
 This mod changes saved data. Back up your world, or test it in a copy first.
@@ -169,7 +170,7 @@ This mod changes saved data. Back up your world, or test it in a copy first.
 | `ExtraCodecsMixin` | Replaces the upper bound of `ExtraCodecs.intRange(1, 99)`, covering both the `max_stack_size` component and `ItemStack.CODEC` |
 | `ModBusEvents` | `ModifyDefaultComponentsEvent` writes the new `max_stack_size` to every item, skipping items with durability and items that stack to 1 |
 | `ContainerMixin` / `SlotMixin` | Return the configured value when `getMaxStackSize()` is 99; other values are passed through |
-| `ItemStackHandlerMixin` / `ComponentItemHandlerMixin` | Slot limits controlled by `raiseModdedSlotLimits`, raise only |
+| `ItemStackHandlerMixin` / `ComponentItemHandlerMixin` | Slot limits controlled by `otherModSlots`, raise only |
 | `CraftingMenuMixin` / `InventoryMenuMixin` + `SuperStackBulkCraft` | Bulk crafting: count crafts, consume once, distribute once |
 | `BulkCraftMath` | Pure arithmetic: availability, crafts, output, space, chunking, conservation checks, with JUnit tests |
 | `ContainersDropStackMixin` | Large stacks drop as a single entity when a container is broken |
@@ -193,11 +194,11 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - Ground item stacks merge up to the configured limit without overflowing: counts are added as long, and the hard-coded 64 inside vanilla `merge` now uses the config. Measured: 1.5e9 + 5e8 merges into 2e9, while 1.5e9 + 1.5e9 stays as two stacks.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64 to 2,147,483,647 instead of 64 to 1,000,000. The default stays 32,768.
 - Bulk crafting accounts with long all the way: ingredients, output and returned items are chunked by their own limits, so a single slot holding two billion items cannot lose anything to int overflow.
-- `compatStackLimit` now defaults to 32768, matching the default stack size, so supported mods' machine slots accept the same stacks by default; raise it if you also raise the stack size, lower it for mods that treat the limit as an array length.
+- Supported mods' slot limits now follow the stack size directly and there is no separate option; if a mod treats the limit as an array length, lower the stack size instead.
 - More Machine large-stack slots: the "multiply by 8" path uses saturating multiplication and the result is capped at the configured stack limit (it used to reach 262,144, beyond the item limit, and got truncated on save).
 - Mystical Agriculture / Automation: Cucumber's shared slot default of 64 now uses the compat limit, so infusion machines accept large stacks; slots with an explicit limit keep it.
 - Sophisticated Core: sorting no longer runs when same-item totals exceed int; it used to overflow into a negative number and wipe both stacks.
-- Create fans: processing time no longer scales with the real stack count without limit. The count used is capped by `fanProcessingVirtualStackSize` (default 64): small stacks keep their real count and behave exactly like vanilla, large stacks are treated as 64. A 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
+- Create fans: processing time no longer scales with the real stack count without limit. The count used is capped by `fanStackCount` (default 64): small stacks keep their real count and behave exactly like vanilla, large stacks are treated as 64. A 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
 - Create: the filter's "extract amount" range is back to the vanilla 64. It draws the scale bar from the filtered item's limit, and 32,768 stretched the screen past its edges; stored values above 64 are clamped when the block loads.
 - Measured: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt both survive a save and reload unchanged; two adjacent stacks of 2e9 do not merge.
 
