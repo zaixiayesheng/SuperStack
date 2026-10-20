@@ -73,8 +73,8 @@ public final class SuperStackConfig {
 
 
     private static final ModConfigSpec.IntValue FAN_PROCESSING_VIRTUAL_STACK_SIZE = BUILDER
-            .comment("鼓风机的处理时长按「这一堆算多少个」来计算，原版公式是 (数量-1)/16+1。这里把参与计算的堆叠数量固定成你填的值：64 等于原版一组的速度，调小更快，1 最快。",
-                    "The fan processing time is computed from a stack count with the vanilla formula (count-1)/16+1. This value replaces the real count: 64 equals the vanilla 64-stack speed, lower is faster, 1 is the fastest.")
+            .comment("鼓风机的处理时长按「这一堆算多少个」来计算，原版公式是 (数量-1)/16+1。这里给参与计算的数量加一个上限：堆叠不超过它时用真实数量（与原版一致），超过它时按它计算。64 等于原版一组的速度，调小更快，1 最快。",
+                    "The fan processing time is computed from a stack count with the vanilla formula (count-1)/16+1. This value caps the count used: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. 64 equals the vanilla 64-stack speed, lower is faster, 1 is the fastest.")
             .defineInRange("fanProcessingVirtualStackSize", 64, 1, 64);
 
     static final ModConfigSpec SPEC = BUILDER.build();

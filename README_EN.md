@@ -122,7 +122,7 @@ The file is `config/superstack-common.toml`; restart after editing.
 | `abbreviateFrom` | 10000 | 1,000–1,000,000 | Where abbreviations start |
 | `tooltipExactCount` | true | — | Show the exact count in tooltips |
 | `raiseModdedSlotLimits` | true | — | Raise slot limits of other mods |
-| `fanProcessingVirtualStackSize` | 64 | 1–64 | Create fans compute their processing time from this virtual stack count (vanilla formula `(count-1)/16+1`); 64 equals the vanilla 64-stack speed, lower is faster, 1 is fastest |
+| `fanProcessingVirtualStackSize` | 64 | 1–64 | Upper bound on the count used by Create fans when computing processing time: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. Vanilla formula `(count-1)/16+1`; 64 equals the vanilla 64-stack speed, lower is faster, 1 is fastest |
 
 ## FAQ
 
@@ -193,7 +193,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - MoreMachine big-stack slots: the x8 multiplication now saturates and the result is clamped to the configured stack size (it used to reach 262,144, past the item limit, and the surplus was dropped on reload).
 - Mystical Agriculture and Mystical Automation: their shared Cucumber library defaulted every slot to 64; slots now use the compat limit, so the infuser and other machines accept large stacks. Slots with an explicit limit keep it.
 - Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
-- Create fans: the processing time now uses `fanProcessingVirtualStackSize` (default 64, the vanilla 64-stack speed) instead of scaling with the real stack size; a 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
+- Create fans: processing time no longer scales with the real stack size without limit. The count used is capped by `fanProcessingVirtualStackSize` (default 64): small stacks keep their real count and behave exactly like vanilla, large stacks are treated as 64. A 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
 - Verified: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt keep their counts across a save and reload; two two-billion stacks next to each other do not merge.
 
 <details>
