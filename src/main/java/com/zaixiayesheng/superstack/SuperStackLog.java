@@ -38,7 +38,7 @@ public final class SuperStackLog {
             {"inventorysorter", "一键背包整理：读取上限走 ItemStack.getMaxStackSize()，放不下会留在原地，不会丢东西"},
             {"invtweaks", "一键背包整理Next：同上，整理前会在本地沙盒里先模拟一遍"},
             {"sophisticatedcore", "精妙核心（整理）：整理时会把槽位内容复制进 ItemStackHandler，"
-                    + "raiseModdedSlotLimits 关掉会截断大堆叠"},
+                    + "otherModSlots 关掉会截断大堆叠"},
             {"kubejs", "KubeJS：它的 remove_slot_limit / default_max_stack_size 默认透传，不会把上限压回去"},
     };
 
@@ -130,7 +130,7 @@ public final class SuperStackLog {
         }
 
         if (changed == 0) {
-            LOGGER.warn("{}没有物品的堆叠上限被改动：检查一下 maxStackSize（当前 {}）和 minimumStackSizeThreshold 是不是把范围卡没了。",
+            LOGGER.warn("{}没有物品的堆叠上限被改动：检查一下 maxStackSize（当前 {}）和 keepUnstackable 是不是把范围卡没了。",
                     PREFIX, max);
             return;
         }

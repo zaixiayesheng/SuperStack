@@ -27,7 +27,7 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
-        if (!SuperStackConfig.tooltipExactCount() || superstack$isSophisticatedScreen()) {
+        if (!SuperStackConfig.tooltipExact() || superstack$isSophisticatedScreen()) {
             return;
         }
         int count = event.getItemStack().getCount();

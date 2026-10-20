@@ -23,6 +23,6 @@ public abstract class InvWrapperMixin {
             require = 0
     )
     private int superstack$limit(Container container) {
-        return SuperStackConfig.compatStackLimit();
+        return SuperStackConfig.maxStackSize();
     }
 }

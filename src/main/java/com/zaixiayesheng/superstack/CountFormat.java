@@ -19,7 +19,7 @@ public final class CountFormat {
 
     /** 槽位里显示的紧凑写法。 */
     public static String compact(int count) {
-        if (count < SuperStackConfig.abbreviateFrom()) {
+        if (count < SuperStackConfig.abbreviateAbove()) {
             return exact(count);
         }
 
