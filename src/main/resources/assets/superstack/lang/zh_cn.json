@@ -1,3 +1,13 @@
 {
-  "superstack.tooltip.count": "数量：%s / %s"
+  "superstack.tooltip.count": "数量：%s / %s",
+  "superstack.configuration.title": "超级堆叠设置",
+  "superstack.configuration.section.superstack.common.toml": "常规",
+  "superstack.configuration.maxStackSize": "最大堆叠数量",
+  "superstack.configuration.compatStackLimit": "联动模组槽位上限",
+  "superstack.configuration.scaleSmallStacks": "小堆叠按比例放大",
+  "superstack.configuration.minimumStackSizeThreshold": "不放大堆叠的下限",
+  "superstack.configuration.countDisplay": "数量显示方式",
+  "superstack.configuration.abbreviateFrom": "开始缩写的位置",
+  "superstack.configuration.tooltipExactCount": "提示框显示精确数量",
+  "superstack.configuration.raiseModdedSlotLimits": "放大其它模组的槽位上限"
 }
