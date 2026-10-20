@@ -36,12 +36,6 @@ public final class SuperStackConfig {
             .comment("联动模组（通用机械、应用能源、精妙、更多熔炉）看到的槽位上限。默认 1000000，比堆叠上限低，避免第三方把槽位上限当数组长度或做乘法时溢出。",
                     "Slot limit exposed to supported mods. Deliberately lower than the stack size; raise it only if you know those mods handle huge values.")
             .defineInRange("compatStackLimit", DEFAULT_COMPAT_STACK_LIMIT, 1, Integer.MAX_VALUE);
-    private static final ModConfigSpec.BooleanValue FUNCTIONAL_STORAGE_VANILLA_CAPACITY = BUILDER
-            .comment("功能性存储的抽屉容量按原版基准算（一份 = 64 个），不随堆叠上限放大。",
-                    "抽屉的容量原本是「格数 × 这一叠有多少个 ÷ 64」，堆叠抬到 32768 后同一个抽屉会显示 512 倍容量（2000 → 1,024,000）。",
-                    "默认打开，让抽屉保持原来的数字；关掉则恢复放大行为。",
-                    "Functional Storage drawer capacity is computed from the item's stack size. Raising stack sizes makes the same drawer report up to 512x its original capacity. Keep this on to keep vanilla numbers, turn it off to let drawers scale with stack size.")
-            .define("functionalStorageVanillaCapacity", true);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_STACKS = BUILDER
             .comment("小堆叠物品（比如末影珍珠 16 个）按比例放大：原上限 × maxStackSize ÷ 64。",
@@ -94,7 +88,6 @@ public final class SuperStackConfig {
     private static volatile boolean tooltipExactCount = true;
     private static volatile boolean raiseModdedSlotLimits = true;
     private static volatile int fanProcessingVirtualStackSize = 64;
-    private static volatile boolean functionalStorageVanillaCapacity = true;
 
     private SuperStackConfig() {
     }
@@ -109,10 +102,6 @@ public final class SuperStackConfig {
 
     public static int fanProcessingVirtualStackSize() {
         return fanProcessingVirtualStackSize;
-    }
-
-    public static boolean functionalStorageVanillaCapacity() {
-        return functionalStorageVanillaCapacity;
     }
 
     public static boolean scaleSmallStacks() {
@@ -164,7 +153,6 @@ public final class SuperStackConfig {
             tooltipExactCount = TOOLTIP_COUNT.get();
             raiseModdedSlotLimits = RAISE_MODDED_SLOT_LIMITS.get();
             fanProcessingVirtualStackSize = FAN_PROCESSING_VIRTUAL_STACK_SIZE.get();
-            functionalStorageVanillaCapacity = FUNCTIONAL_STORAGE_VANILLA_CAPACITY.get();
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
             SuperStackLog.warn("配置尚未就绪，先使用默认值", e);

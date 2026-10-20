@@ -17,8 +17,7 @@
     "CucumberBaseItemStackHandlerMixin",
     "MekmmBigStackSlotMixin",
     "CreateFanProcessingMixin",
-    "CreateFilteringBehaviourMixin",
-    "FunctionalStorageBigInventoryHandlerMixin"
+    "CreateFilteringBehaviourMixin"
   ],
   "injectors": {
     "defaultRequire": 1

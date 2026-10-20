@@ -106,7 +106,6 @@ Vanilla containers follow automatically. Other mods fall into two groups: those 
 | Sophisticated Core / Storage / Backpacks | 1.5.x / 1.6.x / 3.26.x | The 9-slot crafting upgrade grid stopped at 99; container slot limits and on-screen counts stay under Sophisticated's own management |
 | Iron Furnaces | 4.3.x | Output slot limit was hard-coded to 64; it follows the config now |
 | Mystical Agriculture / Automation | 8.0.x | Cucumber's shared slot default was hard-coded to 64; infusion machines accept large stacks now |
-| Functional Storage | 1.5.x | Drawer capacity was multiplied by the stack size (2000 became 1,024,000); it stays at the vanilla number by default |
 | Create | 6.0.x | Fan processing time scaled with the real stack count (32,768 became 2,048x slower); the count used is capped, and the filter "extract amount" screen no longer stretches past the screen edge |
 
 Patches live in a separate `superstack.compat.mixins.json` marked `required: false`: when a target class is missing, one log line is written and startup continues.
@@ -126,7 +125,6 @@ File: `config/superstack-common.toml`. Changes apply after a restart.
 | `tooltipExactCount` | true | - | Show the exact count in tooltips |
 | `raiseModdedSlotLimits` | true | - | Raise slot limits of other mods |
 | `fanProcessingVirtualStackSize` | 64 | 1 to 64 | Upper bound on the count Create fans use when computing processing time: stacks at or below it use their real count (vanilla behaviour), larger stacks are treated as this value. Vanilla formula is `(count-1)/16+1`; 64 equals the vanilla 64-stack speed, lower is faster, 1 is fastest |
-| `functionalStorageVanillaCapacity` | true | - | Compute Functional Storage drawer capacity on the vanilla basis (one unit = 64 items) instead of scaling it with the stack limit. Disable to restore the "slots x stack size / 64" behaviour |
 
 ## FAQ
 
@@ -156,7 +154,6 @@ Creative tabs group by component value, so each item still has a single entry af
 | KubeJS | Its `remove_slot_limit` passes values through and does not push the limit back down |
 | Inventory sorting mods | Read `ItemStack.getMaxStackSize()`; whatever does not fit stays where it was |
 | Sophisticated "sort inventory" | Has its own "do not exceed the item limit" guard; measured with `maxStackSize = 10000` and 27 slots: with `raiseModdedSlotLimits` off 270000 became 2673, with it on 270000 stayed 270000 |
-| Functional Storage | Drawer capacity stays at the vanilla number by default; disable `functionalStorageVanillaCapacity` to scale it with the stack limit |
 | Immersive Engineering / EnderIO / Create | These ship their own inventory interfaces with hard-coded limits, which this mod leaves alone |
 
 This mod changes saved data. Back up your world, or test it in a copy first.
@@ -195,7 +192,6 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - Ground item stacks merge up to the configured limit without overflowing: counts are added as long, and the hard-coded 64 inside vanilla `merge` now uses the config. Measured: 1.5e9 + 5e8 merges into 2e9, while 1.5e9 + 1.5e9 stays as two stacks.
 - Stale component variants in existing saves (an explicit 64, or an "removed" marker) are normalised on read. Only those two traces left by earlier versions are touched; intentional 1/16/32 limits from data packs stay as they are.
 - Applied Energistics caches the hash inside `AEItemKey` at construction, so old variants and clean stacks never compared equal. Hashing now runs on the normalised components, letting old and new data collapse into one entry.
-- Functional Storage drawer capacity is computed on the vanilla basis by default, so a 2000 drawer stays 2000 instead of becoming 1,024,000 when the stack limit is 32,768.
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64 to 2,147,483,647 instead of 64 to 1,000,000. The default stays 32,768.
 - Bulk crafting accounts with long all the way: ingredients, output and returned items are chunked by their own limits, so a single slot holding two billion items cannot lose anything to int overflow.
 - Ground item merging is guarded: two large stacks no longer participate in vanilla's 64-per-step merging, so counts cannot overflow. Stacks of 64 or fewer still merge like vanilla.
