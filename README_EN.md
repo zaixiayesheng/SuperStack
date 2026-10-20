@@ -122,7 +122,7 @@ The file is `config/superstack-common.toml`; restart after editing.
 | `abbreviateFrom` | 10000 | 1,000–1,000,000 | Where abbreviations start |
 | `tooltipExactCount` | true | — | Show the exact count in tooltips |
 | `raiseModdedSlotLimits` | true | — | Raise slot limits of other mods |
-| `fanProcessingTimeCap` | 4 | 1–2,048 | Cap for Create fan processing time scaling; 4 equals the vanilla 64-stack duration |
+| `fanProcessingVirtualStackSize` | 64 | 1–64 | Create fans compute their processing time from this virtual stack count (vanilla formula `(count-1)/16+1`); 64 equals the vanilla 64-stack speed, lower is faster, 1 is fastest |
 
 ## FAQ
 
@@ -185,7 +185,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ## Changelog
 
-### 21.1-1.0.6
+### 21.1-1.0.7
 - The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
 - Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
 - Ground item merging is guarded: two big stacks no longer take part in vanilla's 64-per-step merge, which could overflow the added counts; stacks of 64 or less merge as before.
@@ -193,7 +193,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - MoreMachine big-stack slots: the x8 multiplication now saturates and the result is clamped to the configured stack size (it used to reach 262,144, past the item limit, and the surplus was dropped on reload).
 - Mystical Agriculture and Mystical Automation: their shared Cucumber library defaulted every slot to 64; slots now use the compat limit, so the infuser and other machines accept large stacks. Slots with an explicit limit keep it.
 - Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
-- Create fans: the processing time multiplier is capped by `fanProcessingTimeCap` (default 4, the vanilla 64-stack duration); a 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
+- Create fans: the processing time now uses `fanProcessingVirtualStackSize` (default 64, the vanilla 64-stack speed) instead of scaling with the real stack size; a 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
 - Verified: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt keep their counts across a save and reload; two two-billion stacks next to each other do not merge.
 
 <details>

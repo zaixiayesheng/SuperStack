@@ -72,10 +72,10 @@ public final class SuperStackConfig {
             .define("raiseModdedSlotLimits", true);
 
 
-    private static final ModConfigSpec.IntValue FAN_PROCESSING_TIME_CAP = BUILDER
-            .comment("鼓风机的处理时长会按物品数量放大，这里限制它的放大倍数。默认 4，相当于按原版 64 个一组的时长处理整组。",
-                    "Cap for the fan processing time multiplier. Default 4 equals the vanilla 64-stack behaviour.")
-            .defineInRange("fanProcessingTimeCap", 4, 1, 2048);
+    private static final ModConfigSpec.IntValue FAN_PROCESSING_VIRTUAL_STACK_SIZE = BUILDER
+            .comment("鼓风机的处理时长按「这一堆算多少个」来计算，原版公式是 (数量-1)/16+1。这里把参与计算的堆叠数量固定成你填的值：64 等于原版一组的速度，调小更快，1 最快。",
+                    "The fan processing time is computed from a stack count with the vanilla formula (count-1)/16+1. This value replaces the real count: 64 equals the vanilla 64-stack speed, lower is faster, 1 is the fastest.")
+            .defineInRange("fanProcessingVirtualStackSize", 64, 1, 64);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -87,7 +87,7 @@ public final class SuperStackConfig {
     private static volatile int abbreviateFrom = 10000;
     private static volatile boolean tooltipExactCount = true;
     private static volatile boolean raiseModdedSlotLimits = true;
-    private static volatile int fanProcessingTimeCap = 4;
+    private static volatile int fanProcessingVirtualStackSize = 64;
 
     private SuperStackConfig() {
     }
@@ -100,8 +100,8 @@ public final class SuperStackConfig {
         return compatStackLimit;
     }
 
-    public static int fanProcessingTimeCap() {
-        return fanProcessingTimeCap;
+    public static int fanProcessingVirtualStackSize() {
+        return fanProcessingVirtualStackSize;
     }
 
     public static boolean scaleSmallStacks() {
@@ -152,7 +152,7 @@ public final class SuperStackConfig {
             abbreviateFrom = ABBREVIATE_FROM.get();
             tooltipExactCount = TOOLTIP_COUNT.get();
             raiseModdedSlotLimits = RAISE_MODDED_SLOT_LIMITS.get();
-            fanProcessingTimeCap = FAN_PROCESSING_TIME_CAP.get();
+            fanProcessingVirtualStackSize = FAN_PROCESSING_VIRTUAL_STACK_SIZE.get();
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
             SuperStackLog.warn("配置尚未就绪，先使用默认值", e);
