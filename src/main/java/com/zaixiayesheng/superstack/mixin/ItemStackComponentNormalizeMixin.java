@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
@@ -58,6 +59,16 @@ public abstract class ItemStackComponentNormalizeMixin {
         ItemStack b = superstack$normalized(other);
         // 归一后两份都没有该补丁，再次进入本方法会直接走原版逻辑。
         cir.setReturnValue(ItemStack.isSameItemSameComponents(a, b));
+    }
+
+    /**
+     * 应用能源会用 {@code ItemStack.hashItemAndComponents} 给 {@code AEItemKey} 缓存哈希值，
+     * 之后只拿这个缓存值比较。历史遗留的堆叠和干净堆叠组件不同、哈希也就不同，会被当成两个键，
+     * 各自占一份数量。这里让带痕迹的堆叠按归一后的组件参与哈希，新旧数据才会落到同一个键上。
+     */
+    @ModifyVariable(method = "hashItemAndComponents", at = @At("HEAD"), argsOnly = true)
+    private static ItemStack superstack$normalizeForHash(ItemStack stack) {
+        return superstack$hasStaleLimit(stack) ? superstack$normalized(stack) : stack;
     }
 
     /**
