@@ -21,5 +21,6 @@
   "superstack.configuration.compatCreate": "Create",
   "superstack.tooltip.count": "Count: %s / %s",
   "superstack.configuration.compatOritech": "Oritech",
-  "superstack.configuration.compatImmersiveEngineering": "Immersive Engineering"
+  "superstack.configuration.compatImmersiveEngineering": "Immersive Engineering",
+  "superstack.configuration.compatMisc": "Misc small compat (Mob Grinding Utils, neoecoprototype)."
 }

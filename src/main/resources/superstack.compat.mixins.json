@@ -24,7 +24,14 @@
     "IEInventoryHandlerMixin",
     "IESlotwiseItemHandlerMixin",
     "IEWrappingItemHandlerMixin",
-    "IEBlockEntityInventoryMixin"
+    "IEBlockEntityInventoryMixin",
+    "CreateSlotLimitMixin",
+    "CreateStorageInteractionMixin",
+    "IEBlockSlotLimitMixin",
+    "SophisticatedStorageInputMixin",
+    "NeoEcoTrinityMixin",
+    "MobGrindingUtilsInventoryMixin",
+    "Ae2ContainerAdapterMixin"
   ],
   "injectors": {
     "defaultRequire": 1

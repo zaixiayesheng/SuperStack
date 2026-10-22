@@ -124,6 +124,12 @@ public final class SuperStackConfig {
             .translation("superstack.configuration.compatOritech")
             .define("compatOritech", true);
 
+    private static final ModConfigSpec.BooleanValue MISC_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"其它小型联动：刷怪塔实用设备、neoecoprototype。"},
+                    new String[]{"Misc small compat: Mob Grinding Utils and neoecoprototype slots."}))
+            .translation("superstack.configuration.compatMisc")
+            .define("compatMisc", true);
+
     private static final ModConfigSpec.BooleanValue IMMERSIVE_ENGINEERING_PATCH = BUILDER
             .comment(Text.pick(new String[]{"沉浸工程：机器与容器槽位上限。"}, new String[]{"Immersive Engineering machine and container slots."}))
             .translation("superstack.configuration.compatImmersiveEngineering")
@@ -152,10 +158,11 @@ public final class SuperStackConfig {
     private static volatile boolean compatCreate = true;
     private static volatile boolean compatOritech = true;
     private static volatile boolean compatImmersiveEngineering = true;
+    private static volatile boolean compatMisc = true;
 
 
     public enum CompatPatch {
-        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE, ORITECH, IMMERSIVE_ENGINEERING;
+        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE, ORITECH, IMMERSIVE_ENGINEERING, MISC;
     }
 
     public static boolean compatEnabled(CompatPatch patch) {
@@ -169,6 +176,7 @@ public final class SuperStackConfig {
             case CREATE -> compatCreate;
             case ORITECH -> compatOritech;
             case IMMERSIVE_ENGINEERING -> compatImmersiveEngineering;
+            case MISC -> compatMisc;
         };
     }
 
@@ -276,6 +284,9 @@ public final class SuperStackConfig {
             compatIronFurnaces = IRON_FURNACES_PATCH.get();
             compatMysticalAgriculture = MYSTICAL_AGRICULTURE_PATCH.get();
             compatCreate = CREATE_PATCH.get();
+            compatOritech = ORITECH_PATCH.get();
+            compatImmersiveEngineering = IMMERSIVE_ENGINEERING_PATCH.get();
+            compatMisc = MISC_PATCH.get();
 
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值
