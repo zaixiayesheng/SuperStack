@@ -13,7 +13,7 @@ Chinese version: [README.md](./README.md)
 [![Release](https://img.shields.io/github/v/release/zaixiayesheng/SuperStack?filter=v20.1*&style=flat-square&label=Release&color=blue)](https://github.com/zaixiayesheng/SuperStack/releases)
 [![Minecraft 1.20.1](https://img.shields.io/badge/Minecraft-1.20.1-green.svg?style=flat-square)](https://www.minecraft.net)
 [![Forge 47.4](https://img.shields.io/badge/Forge-47.4+-orange.svg?style=flat-square)](https://files.minecraftforge.net)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+[![License: AGPL-3.0](./LICENSE)](https://www.gnu.org/licenses/agpl-3.0.txt)
 
 [What it is](#what-it-is) · [Install](#install) · [Stack limit](#stack-limit) · [Count display](#count-display) · [Crafting and containers](#crafting-and-containers) · [Slot compatibility](#slot-compatibility) · [Configuration](#configuration) · [FAQ](#faq) · [Compatibility](#compatibility) · [Development](#development) · [Changelog](#changelog)
 
@@ -252,7 +252,9 @@ Jars needed by the third-party patches live in `libs/` as `compileOnly` dependen
 
 ## License and credits
 
-[MIT](./LICENSE) © 2026 zaixiayesheng. The logo is drawn for this project.
+[AGPL-3.0](./LICENSE) copyright 2026 zaixiayesheng. The icon is drawn by this project.
+
+Released under the **GNU Affero General Public License v3.0**: you may use, copy, distribute and modify it freely, but if you distribute a modified version (including making it available over a network) you must publish the complete corresponding source under AGPL-3.0 as well; it may not be relicensed as closed source. Releases 1.0.7 and earlier were published under the MIT license that applied at the time.
 
 ## Feedback
 
