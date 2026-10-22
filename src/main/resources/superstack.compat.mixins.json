@@ -15,6 +15,7 @@
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
     "SophisticatedStatefulComponentItemHandlerMixin",
+    "SophisticatedQuickCraftMixin",
     "SophisticatedInventorySorterMixin",
     "CucumberBaseItemStackHandlerMixin",
     "MekmmBigStackSlotMixin",
