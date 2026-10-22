@@ -193,6 +193,14 @@ Jars needed by the third-party patches live in `libs/` as `compileOnly` dependen
 
 ## Changelog
 
+### 20.1-1.1.0
+
+- The default maximum stack is now 65,536; anything above it needs `experimentalStackSizes` (up to 1,073,741,823).
+- Drag splitting now divides in integers, so one 2^30-1 stack split across two slots no longer creates an extra item.
+- A stack never reports a maximum below its own count, which keeps the "limit - count" headroom non-negative.
+- Ported the AE2 generic-storage and Sophisticated patches to 1.20.1 (interfaces accept whole stacks from pipes, sorting no longer eats items).
+
+
 ### 20.1-1.0.3
 
 - Applied Energistics 2 import/export buses now move a whole stack per operation instead of one item: before, even fully speed-upgraded buses capped at 64 operations x 1 item = 64 items/tick.

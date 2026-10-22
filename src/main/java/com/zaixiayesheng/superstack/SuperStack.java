@@ -18,6 +18,14 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class SuperStack {
     public static final String MOD_ID = "superstack";
 
+    /**
+     * 允许配置到的最大堆叠数量。
+     *
+     * <p>取 {@code Integer.MAX_VALUE / 2} 而不是 {@code Integer.MAX_VALUE}：原版和不少模组会把数量拿去加减，
+     * 留出一半的余量，两个这样的堆叠相加才不会立刻溢出。Stackcraft、BiggerStacks 等同类模组也选了这个值。
+     */
+    public static final int ABSOLUTE_MAX_STACK_SIZE = Integer.MAX_VALUE / 2;
+
     public SuperStack() {
         // 记下构造时刻，配置加载完报「多久之后上限开始生效」
         SuperStackLog.markConstructed();
