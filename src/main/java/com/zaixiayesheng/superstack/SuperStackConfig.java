@@ -369,11 +369,8 @@ public final class SuperStackConfig {
      * 所以这里在必要时直接读一遍配置文件，保证「改配置 + 重启」就能生效。
      */
     public static int codecUpperBound() {
-        if (maxStackSize > 64) {
-            return maxStackSize;
-        }
         int fromFile = readMaxStackSizeFromFile();
-        return fromFile > 64 ? fromFile : DEFAULT_MAX_STACK_SIZE;
+        return Math.max(maxStackSize, fromFile > 64 ? fromFile : 0);
     }
 
     private static int readMaxStackSizeFromFile() {
