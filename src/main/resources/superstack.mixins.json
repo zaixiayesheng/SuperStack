@@ -20,7 +20,9 @@
     "RandomizableContainerBlockEntityMixin",
     "ContainersDropStackMixin",
     "CreativeSlotLimitMixin",
-    "ItemEntityMergeGuardMixin"
+    "ItemEntityMergeGuardMixin",
+    "QuickCraftSplitMixin",
+    "ItemStackMaxStackMixin"
   ],
   "client": [
     "GuiGraphicsMixin"
