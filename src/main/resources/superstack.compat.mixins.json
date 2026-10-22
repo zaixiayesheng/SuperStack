@@ -14,7 +14,8 @@
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
     "IronFurnacesFurnaceTileMixin",
-    "SophisticatedInventorySorterMixin"
+    "SophisticatedInventorySorterMixin",
+    "Ae2KeyTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

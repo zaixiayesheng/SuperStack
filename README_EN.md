@@ -104,7 +104,7 @@ Vanilla containers follow automatically. For other mods there are two cases: slo
 | Mod | Version | What is fixed |
 |---|---|---|
 | Mekanism | 10.4.16.x | Machine and GUI slots hardcode 99; they now follow the config |
-| Applied Energistics 2 | 15.4.11 | Terminal slots stop at 64 and `InternalInventory` defaults to 99; crafted output is no longer split into stacks of 99 when moved to the inventory or cursor |
+| Applied Energistics 2 | 15.4.11 | Terminal slots stop at 64 and `InternalInventory` defaults to 99; crafted output is no longer split into stacks of 99 when moved to the invento; import/export buses move a whole stack per operation |y or cursor |
 | Sophisticated Core / Storage / Backpacks | 1.5.x / 1.5.x / 3.26.x | The crafting upgrade's 9 slots stop at 99; container slot limits and screen rendering are managed by Sophisticated itself |
 | Iron Furnaces | 4.1.8 | Inventory and output slots hardcode 64; both follow the config |
 
@@ -126,6 +126,8 @@ The file is `config/superstack-common.toml`; restart after editing.
 | `fanStackCount` | 64 | 1 to 64 | Stack count used for Create fan processing time (not present on 1.20.1) |
 
 Only the first option needs attention; `compatStackLimit` is gone and supported mods' slot limits now follow `maxStackSize` directly. The first three live under `[basic]`, the rest under `[advanced]`.
+
+Applied Energistics 2 buses follow `maxStackSize` as well; turning off `compat.ae2` restores one-item-at-a-time transfers.
 
 Comments inside the generated config file follow the JVM language: Chinese or English, falling back to Chinese for other locales. Force one with `-Dsuperstack.config.lang=zh` or `=en`. An existing `superstack-common.toml` is not rewritten automatically; delete it to regenerate the comments in the new language.
 
@@ -190,6 +192,11 @@ gradlew test      # 8 unit tests for BulkCraftMath
 Jars needed by the third-party patches live in `libs/` as `compileOnly` dependencies and are not packaged.
 
 ## Changelog
+
+### 20.1-1.0.3
+
+- Applied Energistics 2 import/export buses now move a whole stack per operation instead of one item: before, even fully speed-upgraded buses capped at 64 operations x 1 item = 64 items/tick.
+- It follows `maxStackSize` automatically with no extra config; turning off `compat.ae2` restores the vanilla one-by-one behaviour.
 
 ### 20.1-1.0.2
 - The stack limit can now go up to 2,147,483,647 (the 32-bit int ceiling), range 64-2,147,483,647, default is still 32768.

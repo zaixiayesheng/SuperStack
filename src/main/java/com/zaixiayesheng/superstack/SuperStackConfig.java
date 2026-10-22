@@ -160,6 +160,10 @@ public final class SuperStackConfig {
         return compatEnabled(CompatPatch.IRON_FURNACES) ? maxStackSize : original;
     }
 
+    public static int aeAmountPerOperation(int original) {
+        return compatEnabled(CompatPatch.AE2) ? maxStackSize : original;
+    }
+
     public static int createFilterLimit(int original) {
         return compatEnabled(CompatPatch.CREATE) ? Math.min(original, VANILLA_MAX_STACK_SIZE) : original;
     }
