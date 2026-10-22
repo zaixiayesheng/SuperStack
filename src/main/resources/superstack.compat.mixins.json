@@ -9,6 +9,7 @@
     "Ae2AppEngInternalInventoryMixin",
     "Ae2InternalInventoryItemHandlerMixin",
     "Ae2SlotMixin",
+    "Ae2KeyTypeMixin",
     "Ae2PlayerInternalInventoryMixin",
     "Ae2CarriedItemInventoryMixin",
     "SophisticatedStatefulComponentItemHandlerMixin",
