@@ -22,5 +22,6 @@
   "superstack.tooltip.count": "数量：%s / %s",
   "superstack.configuration.compatOritech": "奥瑞科技",
   "superstack.configuration.compatImmersiveEngineering": "沉浸工程",
-  "superstack.configuration.compatMisc": "其它小型联动开关。"
+  "superstack.configuration.compatMisc": "其它小型联动开关。",
+  "superstack.configuration.experimentalStackSizes": "实验性堆叠上限"
 }

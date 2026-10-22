@@ -31,7 +31,7 @@ Vanilla caps stacks in several separate places, so changing only one of them doe
 - **Containers and slots**: `Container.getMaxStackSize()` returns 99 by default, and chests, inventories and crafting grids all use it.
 - **Crafting**: shift-clicking the crafting result crafts one item per iteration in vanilla, so a grid holding thirty thousand items runs thirty thousand iterations in one tick.
 
-The limit defaults to 32,768 (configurable 64 to 1,000,000). Small stacks scale proportionally (16 becomes 8,192). Items with durability, and items that stack to 1, are left alone.
+The limit defaults to 65,536 (safe range 64 to 65,536, up to 1,073,741,823 with the experimental switch). Small stacks scale proportionally (16 becomes 16,384). Items with durability, and items that stack to 1, are left alone.
 
 ## Install
 
@@ -57,7 +57,8 @@ The multiplier is fixed at `maxStackSize / 64`, so x512 by default. Rules:
 - Items with durability (tools, armour, Meka gear) are not changed.
 - With `keepUnstackable` on, tools, buckets and other one-per-slot items stay at one.
 - With `scaleSmallItems` disabled, every item uses `maxStackSize`.
-- The limit itself can be configured all the way up to 2,147,483,647; 32,768 is only a conservative default.
+- The limit can go up to 1,073,741,823, but anything above 65,536 needs `experimentalStackSizes`;
+  mods that never expected huge stacks may crash or lose items there. 65,536 is the verified safe value.
 
 Saved data and network sync are rewritten as well: counts embedded in items (for example the 9 slots carried by an upgrade item) are stored as an int and synced as a VarInt, so 32,768 survives a save and reload.
 
@@ -118,7 +119,8 @@ File: `config/superstack-common.toml`. Changes apply after a restart.
 
 | Option | Default | Range | Meaning |
 |---|---|---|---|
-| `maxStackSize` | 32768 | 64 to 2,147,483,647 | Items per slot; restart after changing |
+| `maxStackSize` | 65536 | 64 to 1,073,741,823 | Items per slot; above 65,536 needs the experimental switch; restart after changing |
+| `experimentalStackSizes` | false | on / off | Allow limits above 65,536; risks crashes and item loss |
 | `scaleSmallItems` | true | on / off | Items that stack below 64 (ender pearls, eggs) scale up too |
 | `keepUnstackable` | true | on / off | Keep tools, buckets and armour at one per slot |
 | `countStyle` | COMPACT | COMPACT / EXACT | Abbreviate slot counts (12.3k) or always draw the full number |
@@ -127,7 +129,7 @@ File: `config/superstack-common.toml`. Changes apply after a restart.
 | `otherModSlots` | true | on / off | Widen other mods' slot limits so sorting does not truncate stacks |
 | `fanStackCount` | 64 | 1 to 64 | Stack count used for Create fan processing time (not present on 1.20.1) |
 
-Only the first option needs attention; `compatStackLimit` is gone and supported mods' slot limits now follow `maxStackSize` directly. The first three live under `[basic]`, the rest under `[advanced]`.
+`experimentalStackSizes` only gates how high the limit may be set; `compatStackLimit` is gone and supported mods' slot limits now follow `maxStackSize` directly. The first three live under `[basic]`, the rest under `[advanced]`.
 
 Applied Energistics 2 buses follow `maxStackSize` as well; turning off `compat.ae2` restores one-item-at-a-time transfers.
 
@@ -200,11 +202,16 @@ gradlew test      # 8 unit tests for BulkCraftMath
 - Fixed: with a billion-scale stack limit, joining a server could be kicked by the recipe sync packet (`update_recipes`), because recipe ingredient counts exceeded the codec range; the count range is now always opened up to the int limit.
 - Generator Galore: with stacked fuels, the enchantment and container-return branches no longer replace the whole fuel slot with a single item.
 
+- Default limit is now 65,536 (1024x64): anything above it requires `experimentalStackSizes`,
+  and values above the safe bound are clamped with a log warning when the switch is off.
+- The item count codec range is pinned to `Int.MAX_VALUE / 2` instead of following the config;
+  a config-driven bound used to break the `update_recipes` packet on join.
 - Applied Energistics 2 import/export buses now move a whole stack per operation instead of one item: before, even fully speed-upgraded buses capped at 64 operations x 1 item = 64 items/tick.
 - It follows `maxStackSize` automatically with no extra config; turning off `compat.ae2` restores the vanilla one-by-one behaviour.
 
 ### 21.1-1.0.6
-- The stack limit can now go up to 2,147,483,647 (the 32-bit int ceiling), range 64-2,147,483,647, default is still 32768.
+- The stack limit can go up to 1,073,741,823 (half of the 32-bit int ceiling), range 64-1,073,741,823;
+  above 65,536 requires `experimentalStackSizes`. Default is 65,536.
 - Bulk crafting now counts in long: ingredients, products and returned containers are all computed in long and written back in chunks capped by each stack limit, so a two-billion stack does not lose items to int overflow.
 - Ground item merging follows the configured limit: counts are added as long and the hard-coded 64 inside vanilla `merge` is replaced by the config value. Measured: 1.5B + 0.5B merges into 2B, while 1.5B + 1.5B stays split.
 - Compat slots now simply follow the stack limit instead of having their own ceiling; the Applied Energistics, Mekanism, Sophisticated, MoreMachine, Mystical Agriculture and Create patches can each be disabled.
@@ -264,7 +271,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 <details>
 <summary><b>21.1-1.0.0</b></summary>
 
-- Configurable item stack limit (64 to 1,000,000, default 32,768) with proportional scaling for small stacks and a threshold to skip them.
+- Configurable item stack limit (64 to 1,073,741,823, safe default 65,536) with proportional scaling for small stacks and a threshold to skip them.
 - Count display: exact up to 9,999, abbreviated from 10,000, exact value in the tooltip.
 
 </details>

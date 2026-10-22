@@ -19,7 +19,13 @@ import java.util.TreeSet;
  */
 public final class SuperStackConfig {
     /** 配置还没加载时的兜底值，跟默认值保持一致。 */
-    public static final int DEFAULT_MAX_STACK_SIZE = 32768;
+    public static final int DEFAULT_MAX_STACK_SIZE = 65536;
+
+    /**
+     * 经过验证的安全上限。超过这个值的堆叠，部分模组没有按大堆叠写过
+     * （拿上限分配数组、拿上限算百分比），可能崩溃或丢物品，所以要显式打开实验性开关。
+     */
+    public static final int SAFE_MAX_STACK_SIZE = 65536;
 
     /** 原版的默认堆叠上限，缩放比例以它为基准。 */
     public static final int VANILLA_MAX_STACK_SIZE = 64;
@@ -34,6 +40,16 @@ public final class SuperStackConfig {
             .comment(Text.pick(new String[]{"一个格子能堆多少。原版是 64。改完重启游戏。"}, new String[]{"How many items fit in one slot. Vanilla is 64. Restart after changing."}))
             .translation("superstack.configuration.maxStackSize")
             .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, SuperStack.ABSOLUTE_MAX_STACK_SIZE);
+
+    private static final ModConfigSpec.BooleanValue EXPERIMENTAL_STACK_SIZES = BUILDER
+            .comment(Text.pick(new String[]{
+                    "允许把 maxStackSize 设到 " + SAFE_MAX_STACK_SIZE + " 以上（最高 1073741823）。",
+                    "超过安全值后，没有按大堆叠写过的模组可能崩溃或丢物品，属于实验性设置。"},
+                    new String[]{
+                    "Allow maxStackSize above " + SAFE_MAX_STACK_SIZE + " (up to 1073741823).",
+                    "Above the safe value, mods that never expected huge stacks may crash or lose items. Experimental."}))
+            .translation("superstack.configuration.experimentalStackSizes")
+            .define("experimentalStackSizes", false);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_ITEMS = BUILDER
             .comment(Text.pick(new String[]{"末影珍珠、鸡蛋这种不到 64 的物品也按原比例放大。"}, new String[]{"Items that stack below 64 (ender pearls, eggs) scale up by the same ratio."}))
@@ -142,6 +158,7 @@ public final class SuperStackConfig {
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static volatile int maxStackSize = DEFAULT_MAX_STACK_SIZE;
+    private static volatile boolean experimentalStackSizes = false;
     private static volatile boolean scaleSmallItems = true;
     private static volatile boolean keepUnstackable = true;
     private static volatile CountDisplay countStyle = CountDisplay.COMPACT;
@@ -270,6 +287,15 @@ public final class SuperStackConfig {
 
         try {
             maxStackSize = Math.min(MAX_STACK_SIZE.get(), SuperStack.ABSOLUTE_MAX_STACK_SIZE);
+            experimentalStackSizes = EXPERIMENTAL_STACK_SIZES.get();
+            if (maxStackSize > SAFE_MAX_STACK_SIZE && !experimentalStackSizes) {
+                SuperStackLog.warn("maxStackSize = " + maxStackSize + " 超过安全值 " + SAFE_MAX_STACK_SIZE
+                        + "，已按安全值生效；确实要用这么大的堆叠，请在配置里打开 experimentalStackSizes。");
+                maxStackSize = SAFE_MAX_STACK_SIZE;
+            } else if (maxStackSize > SAFE_MAX_STACK_SIZE) {
+                SuperStackLog.warn("maxStackSize = " + maxStackSize + " 属于实验性设置："
+                        + "没有按大堆叠写过的模组可能崩溃或丢物品。");
+            }
             scaleSmallItems = SCALE_SMALL_ITEMS.get();
             keepUnstackable = KEEP_UNSTACKABLE.get();
             countStyle = COUNT_STYLE.get();
