@@ -59,6 +59,9 @@ public final class SuperStackLog {
 
         LOGGER.info("{}超级堆叠 v{} 已加载（NeoForge 1.21.1）", PREFIX, version);
         LOGGER.info("{}{}", PREFIX, configSummary);
+        LOGGER.info("{}编解码数量上限：{}（配置上限 {}）", PREFIX,
+                com.zaixiayesheng.superstack.SuperStackConfig.codecUpperBound(),
+                com.zaixiayesheng.superstack.SuperStackConfig.maxStackSize());
         LOGGER.info("{}配置文件：{}{}", PREFIX, configPath,
                 elapsedMs >= 0L ? "（上限在启动 " + elapsedMs + "ms 后生效）" : "");
 

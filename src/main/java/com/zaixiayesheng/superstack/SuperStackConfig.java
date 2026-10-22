@@ -363,8 +363,44 @@ public final class SuperStackConfig {
     }
 
     /** 原版 ExtraCodecs.intRange(1, 99) 是堆叠上限的校验范围，把上界换掉。 */
+
+    /**
+     * 编解码器的数量上限。{@code ItemStack.CODEC} 在类初始化时就建好，那时配置文件可能还没读完，
+     * 所以这里在必要时直接读一遍配置文件，保证「改配置 + 重启」就能生效。
+     */
+    public static int codecUpperBound() {
+        if (maxStackSize > 64) {
+            return maxStackSize;
+        }
+        int fromFile = readMaxStackSizeFromFile();
+        return fromFile > 64 ? fromFile : DEFAULT_MAX_STACK_SIZE;
+    }
+
+    private static int readMaxStackSizeFromFile() {
+        try {
+            java.nio.file.Path path = net.neoforged.fml.loading.FMLPaths.CONFIGDIR.get()
+                    .resolve("superstack-common.toml");
+            if (!java.nio.file.Files.exists(path)) {
+                return -1;
+            }
+            for (String line : java.nio.file.Files.readAllLines(path, java.nio.charset.StandardCharsets.UTF_8)) {
+                String trimmed = line.trim();
+                if (!trimmed.startsWith("maxStackSize")) {
+                    continue;
+                }
+                int eq = trimmed.indexOf('=');
+                if (eq > 0) {
+                    return Integer.parseInt(trimmed.substring(eq + 1).trim());
+                }
+            }
+        } catch (Exception ignored) {
+            // 读不到就用默认值，不影响启动。
+        }
+        return -1;
+    }
+
     public static int raiseCodecUpperBound(int bound) {
-        return bound == 99 ? Integer.MAX_VALUE : bound;
+        return bound == 99 ? codecUpperBound() : bound;
     }
 
     /** 其它模组的物品槽上限（可选，默认不动，只升不降）。 */
