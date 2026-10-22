@@ -13,7 +13,7 @@ Chinese version: [README.md](./README.md)
 [![Release](https://img.shields.io/github/v/release/zaixiayesheng/SuperStack?filter=v21.1*&style=flat-square&label=Release&color=blue)](https://github.com/zaixiayesheng/SuperStack/releases)
 [![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-green.svg?style=flat-square)](https://www.minecraft.net)
 [![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1+-orange.svg?style=flat-square)](https://neoforged.net)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+[![License: AGPL-3.0](./LICENSE)](https://www.gnu.org/licenses/agpl-3.0.txt)
 
 [What it is](#what-it-is) · [Install](#install) · [Stack limit](#stack-limit) · [Count display](#count-display) · [Crafting and containers](#crafting-and-containers) · [Slot compatibility](#slot-compatibility) · [Configuration](#configuration) · [FAQ](#faq) · [Compatibility](#compatibility) · [Developers](#developers) · [Changelog](#changelog)
 
@@ -47,7 +47,7 @@ The limit defaults to 32,768 (configurable 64 to 1,000,000). Small stacks scale 
 
 | Vanilla limit | Raised to (default config) |
 |---|---|
-| 64 | 32,768 |
+| 64 | 65,536 |
 | 16 | 8,192 |
 | 8 | 4,096 |
 | 1 | 1 (unchanged) |
@@ -137,8 +137,8 @@ Stacks above the vanilla limit are rejected when loading; the log records `Tried
 **Server has it, client does not?**
 The client still shows and works with 64, and the server rejects the overflow, which looks like "clicking does nothing". Install on both sides.
 
-**Why is a stack not 32,768?**
-Items with a 16 limit scale to 8,192. Disable `scaleSmallItems` to make everything use the limit.
+**Why is a stack not 65,536?**
+Items with a 16 limit scale to 16,384. Disable `scaleSmallItems` to make everything use the limit.
 
 **Why can I not see this mod's count overlay in Sophisticated screens?**
 Sophisticated draws abbreviated counts itself, so this mod steps aside in those screens.
@@ -258,7 +258,9 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ## License and credits
 
-[MIT](./LICENSE) copyright 2026 zaixiayesheng. The icon is drawn by this project.
+[AGPL-3.0](./LICENSE) copyright 2026 zaixiayesheng. The icon is drawn by this project.
+
+Released under the **GNU Affero General Public License v3.0**: you may use, copy, distribute and modify it freely, but if you distribute a modified version (including making it available over a network) you must publish the complete corresponding source under AGPL-3.0 as well; it may not be relicensed as closed source. Releases 1.0.7 and earlier were published under the MIT license that applied at the time.
 
 ## Feedback
 
