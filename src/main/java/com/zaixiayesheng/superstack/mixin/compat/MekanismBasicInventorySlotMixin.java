@@ -2,6 +2,7 @@ package com.zaixiayesheng.superstack.mixin.compat;
 
 import com.zaixiayesheng.superstack.SuperStackConfig;
 import net.minecraft.world.item.ItemStack;
+import mekanism.common.inventory.slot.BasicInventorySlot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <p>只替换「正好 64 / 99」的老默认值，1、16、1024 这类明确的小上限原样保留。
  */
-@Mixin(targets = "mekanism.common.inventory.slot.BasicInventorySlot", remap = false)
+@Mixin(value = mekanism.common.inventory.slot.BasicInventorySlot.class, remap = false)
 public abstract class MekanismBasicInventorySlotMixin {
     @Inject(method = "getLimit(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"), cancellable = true)
     private void superstack$raiseLimit(ItemStack stack, CallbackInfoReturnable<Integer> cir) {

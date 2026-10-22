@@ -1,6 +1,7 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
 import com.zaixiayesheng.superstack.SuperStackConfig;
+import appeng.api.stacks.AEItemKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <p>这里把 getter 的返回值抬到配置的堆叠上限：存储里的长整型数量不变，只是允许一次取出更大的堆叠。
  */
-@Mixin(targets = "appeng.api.stacks.AEItemKey", remap = false)
+@Mixin(value = appeng.api.stacks.AEItemKey.class, remap = false)
 public abstract class Ae2ItemKeyMixin {
 
     @Inject(method = "getMaxStackSize", at = @At("RETURN"), cancellable = true, remap = false)

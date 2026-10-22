@@ -1,6 +1,7 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
 import com.zaixiayesheng.superstack.SuperStackConfig;
+import ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * {@code tick} are the auto-IO thresholds. {@code tick} is also a static method, so a non-static
  * callback cannot target it at all.
  */
-@Mixin(targets = "ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase", remap = false)
+@Mixin(value = ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase.class, remap = false)
 public abstract class IronFurnacesFurnaceTileMixin {
 
     @ModifyConstant(

@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  * <p>Methods are referenced by their production (SRG) names because mod classes are not remapped in
  * a production environment.
  */
-@Mixin(targets = "ironfurnaces.tileentity.TileEntityInventory", remap = false)
+@Mixin(value = ironfurnaces.tileentity.TileEntityInventory.class, remap = false)
 public abstract class IronFurnacesInventoryLimitMixin {
 
     @Redirect(

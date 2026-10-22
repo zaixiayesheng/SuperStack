@@ -1,6 +1,7 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
 import com.zaixiayesheng.superstack.SuperStackConfig;
+import appeng.util.inv.PlayerInternalInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
 /**
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
  * <p>The method does not exist on the target class, only as an interface default, so it is merged in
  * as a real override instead of being injected into an inherited body.
  */
-@Mixin(targets = "appeng.util.inv.PlayerInternalInventory", remap = false)
+@Mixin(value = appeng.util.inv.PlayerInternalInventory.class, remap = false)
 public abstract class Ae2PlayerInternalInventoryMixin {
     public int getSlotLimit(int slot) {
         return SuperStackConfig.raiseCompatLimit(SuperStackConfig.CompatPatch.AE2, 99);

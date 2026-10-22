@@ -1,6 +1,7 @@
 package com.zaixiayesheng.superstack.mixin.compat;
 
 import com.zaixiayesheng.superstack.SuperStackConfig;
+import appeng.api.stacks.AEKeyType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * 也只有 64 次操作 × 1 个 = 64 个/tick，堆叠再大也运不动。这里把物品类型改成「一次操作搬
  * 一整个堆叠」，与容器的槽位上限保持一致。
  */
-@Mixin(targets = "appeng.api.stacks.AEKeyType", remap = false)
+@Mixin(value = appeng.api.stacks.AEKeyType.class, remap = false)
 public abstract class Ae2KeyTypeMixin {
     @Shadow
     public abstract Class<?> getKeyClass();
