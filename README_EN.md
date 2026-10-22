@@ -6,7 +6,7 @@
 
 <div align="center">
 
-Raises the item stack limit from 64 to a configurable value (32,768 by default) and teaches containers, slots, saved data, network sync and crafting about the new limit.
+Raises the item stack limit from 64 to a configurable value (65,536 by default) and teaches containers, slots, saved data, network sync and crafting about the new limit.
 
 Chinese version: [README.md](./README.md)
 
@@ -31,7 +31,7 @@ In 1.20.1 the stack limit is capped in several places, and changing only one of 
 - **Containers**: `Container.getMaxStackSize()` returns 64 by default, and chests, hoppers, furnaces and the player inventory all inherit it.
 - **Crafting**: shift-clicking the result crafts one item per round, so a grid holding tens of thousands of items runs tens of thousands of rounds inside a single tick.
 
-The limit defaults to 32,768 (configurable 64–1,000,000). Small stacks scale proportionally (16 → 8,192); stackable-by-1 items and items with durability are left alone.
+The limit defaults to 65,536 (safe range 64 to 65,536, up to 1,073,741,823 with the experimental switch). Small stacks scale proportionally (16 becomes 16,384); stackable-by-1 items and items with durability are left alone.
 
 ## Install
 
@@ -47,7 +47,7 @@ The limit defaults to 32,768 (configurable 64–1,000,000). Small stacks scale p
 
 | Vanilla limit | With default settings |
 |---|---|
-| 64 | 32,768 |
+| 64 | 65,536 |
 | 16 | 8,192 |
 | 8 | 4,096 |
 | 1 | 1 (unchanged) |
@@ -57,7 +57,7 @@ The multiplier is `maxStackSize / 64`, i.e. ×512 by default. Rules:
 - Items with durability (tools, armor, Meka gear) are untouched.
 - Items whose vanilla limit is at or below `keepUnstackable` (1 by default) are untouched.
 - With `scaleSmallItems` disabled, every item uses `maxStackSize`.
-- The limit itself can go up to 2,147,483,647; 32,768 is only a conservative default.
+- The limit goes up to 1,073,741,823; anything above 65,536 needs `experimentalStackSizes`, and 65,536 is the safe default.
 
 Counts are stored as ints in NBT and synced as VarInts; stacks above 64 sent by the creative client are no longer discarded by the server.
 
@@ -142,7 +142,7 @@ Stacks above the vanilla limit are rejected when loading, the log records `Tried
 **Server has it, client does not?**
 The client still shows and works with 64, and the server rejects the overflow — it looks like "clicking does nothing". Install on both sides.
 
-**Why is a stack 8,192 instead of 32,768?**
+**Why is a stack 16,384 instead of 65,536?**
 Items with a vanilla limit of 16 are scaled proportionally. Disable `scaleSmallItems` to use the full limit everywhere.
 
 **Why did creative-mode stacks used to vanish?**
