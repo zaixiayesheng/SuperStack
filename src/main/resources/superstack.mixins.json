@@ -13,7 +13,8 @@
     "ComponentItemHandlerMixin",
     "SlotMixin",
     "ItemEntityMergeGuardMixin",
-    "ItemStackMaxStackMixin"
+    "ItemStackMaxStackMixin",
+    "QuickCraftSplitMixin"
   ],
   "client": [
     "GuiGraphicsMixin"

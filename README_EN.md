@@ -200,6 +200,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 Local build, not published yet.
 
+- Drag-splitting divides the count in int instead of float: vanilla rounds counts above 16,777,216 through a 24-bit mantissa, so dragging one 1,073,741,823 stack across two slots produced 536,870,912 each and one extra item.
 - Oritech machine and storage slots no longer stop at 64; Ad Astra already uses vanilla containers and needs no patch.
 - Fixed: with a billion-scale stack limit, joining a server could be kicked by the recipe sync packet (`update_recipes`), because recipe ingredient counts exceeded the codec range; the count range is now always opened up to the int limit.
 - Generator Galore: with stacked fuels, the enchantment and container-return branches no longer replace the whole fuel slot with a single item.
