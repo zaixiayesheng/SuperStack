@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.zaixiayesheng.superstack.SuperStackConfig;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,12 +55,17 @@ public abstract class ItemStackHandlerMixin {
         if (current.getCount() <= 1) {
             return;
         }
-        ItemStackHandler self = (ItemStackHandler) (Object) this;
-        if (self.isItemValid(slot, stack)) {
-            // 正常往燃料槽里放燃料（或菜单里的同种合并），交给原逻辑。
+
+        // ManualItemHandler 不重写 isItemValid（永远返回 true），只能按「mod 自己塞回来的东西」识别：
+        // 附魔书发电机塞的是空白书；需要归还容器的燃料塞的是它的剩余物。
+        ItemStack remainder = current.getCraftingRemainingItem();
+        boolean returnedBook = stack.is(Items.BOOK);
+        boolean returnedContainer = !remainder.isEmpty() && ItemStack.isSameItem(remainder, stack);
+        if (!returnedBook && !returnedContainer) {
             return;
         }
 
+        ItemStackHandler self = (ItemStackHandler) (Object) this;
         ci.cancel();
 
         ItemStack remainingFuel = current.copy();
