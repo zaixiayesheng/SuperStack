@@ -7,16 +7,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
- * 原版把堆叠数量限制在 1~99：{@code ExtraCodecs.intRange(1, 99)}。
- * 整个原版只有两处用到这个范围，都是我们要改的：
+ * 原版把堆叠数量限制在 1~99（{@code ExtraCodecs.intRange(1, 99)}），整个原版只有两处用它：
+ * {@code DataComponents.MAX_STACK_SIZE} 与 {@code ItemStack.CODEC} 的 count 字段。
  *
- * <ul>
- *   <li>{@code DataComponents.MAX_STACK_SIZE} —— 物品的堆叠上限组件；</li>
- *   <li>{@code ItemStack.CODEC} 的 count 字段 —— 存盘 / 读取时的校验范围，
- *       不改的话大堆叠在存档读写时会被判非法。</li>
- * </ul>
- *
- * 所以直接改这个方法的上界，比按 lambda 名字去定位调用点稳得多。
+ * <p>把上界固定放开到 int 上限，而不是跟配置走：{@code ItemStack.CODEC} 是类初始化时就建好的，
+ * 如果那时配置还没读完（本模组的配置要等服务器启动才生效），编解码范围会被冻在旧值上，
+ * 之后合成表同步（update_recipes）遇到大数量的配方原料就会报
+ * {@code Value must be within range [1;32768]: 2147483647}。</p>
  */
 @Mixin(ExtraCodecs.class)
 public abstract class ExtraCodecsMixin {

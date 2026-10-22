@@ -364,7 +364,7 @@ public final class SuperStackConfig {
 
     /** 原版 ExtraCodecs.intRange(1, 99) 是堆叠上限的校验范围，把上界换掉。 */
     public static int raiseCodecUpperBound(int bound) {
-        return bound == 99 ? maxStackSize : bound;
+        return bound == 99 ? Integer.MAX_VALUE : bound;
     }
 
     /** 其它模组的物品槽上限（可选，默认不动，只升不降）。 */
