@@ -105,6 +105,8 @@ Vanilla containers follow automatically. Other mods fall into two groups: those 
 | Applied Energistics 2 | 19.2.x | Terminal slots stopped at 64 and `InternalInventory` defaults to 99; crafted output written to the inventory or cursor is no longer split into 99s ; import/export buses move a whole stack per operation |
 | Sophisticated Core / Storage / Backpacks | 1.5.x / 1.6.x / 3.26.x | The 9-slot crafting upgrade grid stopped at 99; container slot limits and on-screen counts stay under Sophisticated's own management |
 | Iron Furnaces | 4.3.x | Output slot limit was hard-coded to 64; it follows the config now |
+| Oritech | 1.2.x | Machine and storage slots were hard-coded to 64; they follow the config now |
+| Ad Astra | 1.16.x | Uses vanilla containers, so no extra patch is needed |
 | Mystical Agriculture / Automation | 8.0.x | Cucumber's shared slot default was hard-coded to 64; infusion machines accept large stacks now |
 | Create | 6.0.x | Fan processing time scaled with the real stack count (32,768 became 2,048x slower); the count used is capped, and the filter "extract amount" screen no longer stretches past the screen edge |
 
@@ -193,6 +195,8 @@ gradlew test      # 8 unit tests for BulkCraftMath
 ## Changelog
 
 ### 21.1-1.0.7
+
+- Oritech machine and storage slots no longer stop at 64; Ad Astra already uses vanilla containers and needs no patch.
 
 - Applied Energistics 2 import/export buses now move a whole stack per operation instead of one item: before, even fully speed-upgraded buses capped at 64 operations x 1 item = 64 items/tick.
 - It follows `maxStackSize` automatically with no extra config; turning off `compat.ae2` restores the vanilla one-by-one behaviour.

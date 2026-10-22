@@ -19,5 +19,6 @@
   "superstack.configuration.compatIronFurnaces": "Iron Furnaces",
   "superstack.configuration.compatMysticalAgriculture": "Mystical Agriculture",
   "superstack.configuration.compatCreate": "Create",
-  "superstack.tooltip.count": "Count: %s / %s"
+  "superstack.tooltip.count": "Count: %s / %s",
+  "superstack.configuration.compatOritech": "Oritech"
 }

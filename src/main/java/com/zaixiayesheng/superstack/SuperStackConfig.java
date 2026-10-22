@@ -119,6 +119,11 @@ public final class SuperStackConfig {
             .translation("superstack.configuration.compatCreate")
             .define("compatCreate", true);
 
+    private static final ModConfigSpec.BooleanValue ORITECH_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"奥瑞科技：机器槽位上限。"}, new String[]{"Oritech machine slots."}))
+            .translation("superstack.configuration.compatOritech")
+            .define("compatOritech", true);
+
     static {
         BUILDER.pop();
     }
@@ -140,10 +145,11 @@ public final class SuperStackConfig {
     private static volatile boolean compatIronFurnaces = true;
     private static volatile boolean compatMysticalAgriculture = true;
     private static volatile boolean compatCreate = true;
+    private static volatile boolean compatOritech = true;
 
 
     public enum CompatPatch {
-        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE;
+        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE, ORITECH;
     }
 
     public static boolean compatEnabled(CompatPatch patch) {
@@ -155,6 +161,7 @@ public final class SuperStackConfig {
             case IRON_FURNACES -> compatIronFurnaces;
             case MYSTICAL_AGRICULTURE -> compatMysticalAgriculture;
             case CREATE -> compatCreate;
+            case ORITECH -> compatOritech;
         };
     }
 
@@ -165,6 +172,11 @@ public final class SuperStackConfig {
     public static int ironFurnaceLimit(int original) {
         return compatEnabled(CompatPatch.IRON_FURNACES) ? maxStackSize : original;
     }
+
+    public static int oritechSlotLimit(int original) {
+        return compatEnabled(CompatPatch.ORITECH) ? maxStackSize : original;
+    }
+
 
     public static int aeAmountPerOperation(int original) {
         return compatEnabled(CompatPatch.AE2) ? maxStackSize : original;
