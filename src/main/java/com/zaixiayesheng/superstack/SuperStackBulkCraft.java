@@ -97,7 +97,7 @@ public final class SuperStackBulkCraft {
                 if (current.isEmpty()) {
                     craftSlots.setItem(i, gave);
                 } else if (ItemStack.isSameItemSameComponents(current, gave)) {
-                    int room = current.getMaxStackSize() - current.getCount();
+                    int room = Math.max(0, current.getMaxStackSize() - current.getCount());
                     if (room >= chunk) {
                         current.grow(chunk);
                     } else {

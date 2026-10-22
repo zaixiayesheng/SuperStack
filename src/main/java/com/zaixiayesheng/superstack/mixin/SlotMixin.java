@@ -23,8 +23,12 @@ public abstract class SlotMixin {
     }
 
     @ModifyReturnValue(method = "getMaxStackSize(Lnet/minecraft/world/item/ItemStack;)I", at = @At("RETURN"))
-    private int superstack$neverBelowContents(int original) {
+    private int superstack$neverBelowContents(int original, ItemStack stack) {
         ItemStack current = ((Slot) (Object) this).getItem();
-        return current.isEmpty() ? original : Math.max(original, current.getCount());
+        // 只对「同一种物品」兜底：槽里堆着 1,000 个铁锭时，不能因此让 16 个一组的鸡蛋也塞到 1,000。
+        if (current.isEmpty() || !ItemStack.isSameItemSameComponents(current, stack)) {
+            return original;
+        }
+        return Math.max(original, current.getCount());
     }
 }
