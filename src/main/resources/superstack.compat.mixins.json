@@ -18,7 +18,11 @@
     "MekmmBigStackSlotMixin",
     "CreateFanProcessingMixin",
     "CreateFilteringBehaviourMixin",
-    "OritechInventoryStorageMixin"
+    "OritechInventoryStorageMixin",
+    "IEInventoryHandlerMixin",
+    "IESlotwiseItemHandlerMixin",
+    "IEWrappingItemHandlerMixin",
+    "IEBlockEntityInventoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -20,5 +20,6 @@
   "superstack.configuration.compatMysticalAgriculture": "神秘农业",
   "superstack.configuration.compatCreate": "机械动力",
   "superstack.tooltip.count": "数量：%s / %s",
-  "superstack.configuration.compatOritech": "奥瑞科技"
+  "superstack.configuration.compatOritech": "奥瑞科技",
+  "superstack.configuration.compatImmersiveEngineering": "沉浸工程"
 }

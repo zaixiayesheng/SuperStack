@@ -124,6 +124,11 @@ public final class SuperStackConfig {
             .translation("superstack.configuration.compatOritech")
             .define("compatOritech", true);
 
+    private static final ModConfigSpec.BooleanValue IMMERSIVE_ENGINEERING_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"沉浸工程：机器与容器槽位上限。"}, new String[]{"Immersive Engineering machine and container slots."}))
+            .translation("superstack.configuration.compatImmersiveEngineering")
+            .define("compatImmersiveEngineering", true);
+
     static {
         BUILDER.pop();
     }
@@ -146,10 +151,11 @@ public final class SuperStackConfig {
     private static volatile boolean compatMysticalAgriculture = true;
     private static volatile boolean compatCreate = true;
     private static volatile boolean compatOritech = true;
+    private static volatile boolean compatImmersiveEngineering = true;
 
 
     public enum CompatPatch {
-        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE, ORITECH;
+        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE, ORITECH, IMMERSIVE_ENGINEERING;
     }
 
     public static boolean compatEnabled(CompatPatch patch) {
@@ -162,6 +168,7 @@ public final class SuperStackConfig {
             case MYSTICAL_AGRICULTURE -> compatMysticalAgriculture;
             case CREATE -> compatCreate;
             case ORITECH -> compatOritech;
+            case IMMERSIVE_ENGINEERING -> compatImmersiveEngineering;
         };
     }
 
@@ -175,6 +182,10 @@ public final class SuperStackConfig {
 
     public static int oritechSlotLimit(int original) {
         return compatEnabled(CompatPatch.ORITECH) ? maxStackSize : original;
+    }
+
+    public static int ieSlotLimit(int original) {
+        return compatEnabled(CompatPatch.IMMERSIVE_ENGINEERING) ? maxStackSize : original;
     }
 
 

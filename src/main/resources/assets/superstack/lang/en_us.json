@@ -20,5 +20,6 @@
   "superstack.configuration.compatMysticalAgriculture": "Mystical Agriculture",
   "superstack.configuration.compatCreate": "Create",
   "superstack.tooltip.count": "Count: %s / %s",
-  "superstack.configuration.compatOritech": "Oritech"
+  "superstack.configuration.compatOritech": "Oritech",
+  "superstack.configuration.compatImmersiveEngineering": "Immersive Engineering"
 }
