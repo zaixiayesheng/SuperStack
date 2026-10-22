@@ -161,7 +161,7 @@ Creative tabs group by component value, so each item still has a single entry af
 | KubeJS | Its `remove_slot_limit` passes values through and does not push the limit back down |
 | Inventory sorting mods | Read `ItemStack.getMaxStackSize()`; whatever does not fit stays where it was |
 | Sophisticated "sort inventory" | Has its own "do not exceed the item limit" guard; measured with `maxStackSize = 10000` and 27 slots: with `otherModSlots` off 270000 became 2673, with it on 270000 stayed 270000 |
-| Immersive Engineering / EnderIO / Create | These ship their own inventory interfaces with hard-coded limits, which this mod leaves alone |
+| EnderIO / Create | Both define their own inventories with hard-coded limits: EnderIO machine slots follow the structure definition and Create counts internally by 64. The stack limit only changes how much fits, not those numbers (Create fans and filters are handled separately) |
 
 This mod changes saved data. Back up your world, or test it in a copy first.
 
