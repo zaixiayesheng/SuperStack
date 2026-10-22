@@ -6,7 +6,7 @@
 
 <div align="center">
 
-Raises the item stack limit from 64 to a configurable value (32,768 by default) and makes containers, slots, saved data, network sync and crafting all respect it.
+Raises the item stack limit from 64 to a configurable value (65,536 by default) and makes containers, slots, saved data, network sync and crafting all respect it.
 
 Chinese version: [README.md](./README.md)
 
@@ -163,7 +163,7 @@ Creative tabs group by component value, so each item still has a single entry af
 | KubeJS | Its `remove_slot_limit` passes values through and does not push the limit back down |
 | Inventory sorting mods | Read `ItemStack.getMaxStackSize()`; whatever does not fit stays where it was |
 | Sophisticated "sort inventory" | Has its own "do not exceed the item limit" guard; measured with `maxStackSize = 10000` and 27 slots: with `otherModSlots` off 270000 became 2673, with it on 270000 stayed 270000 |
-| EnderIO / Create | Both define their own inventories with hard-coded limits: EnderIO machine slots follow the structure definition and Create counts internally by 64. The stack limit only changes how much fits, not those numbers (Create fans and filters are handled separately) |
+| EnderIO | Its inventory layouts carry their own hardcoded limits; machine slot sizes are not changed here |
 
 This mod changes saved data. Back up your world, or test it in a copy first.
 
