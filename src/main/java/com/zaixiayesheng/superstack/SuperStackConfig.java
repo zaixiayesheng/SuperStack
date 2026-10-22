@@ -33,7 +33,7 @@ public final class SuperStackConfig {
     private static final ModConfigSpec.IntValue MAX_STACK_SIZE = BUILDER
             .comment(Text.pick(new String[]{"一个格子能堆多少。原版是 64。改完重启游戏。"}, new String[]{"How many items fit in one slot. Vanilla is 64. Restart after changing."}))
             .translation("superstack.configuration.maxStackSize")
-            .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, Integer.MAX_VALUE);
+            .defineInRange("maxStackSize", DEFAULT_MAX_STACK_SIZE, 64, SuperStack.ABSOLUTE_MAX_STACK_SIZE);
 
     private static final ModConfigSpec.BooleanValue SCALE_SMALL_ITEMS = BUILDER
             .comment(Text.pick(new String[]{"末影珍珠、鸡蛋这种不到 64 的物品也按原比例放大。"}, new String[]{"Items that stack below 64 (ender pearls, eggs) scale up by the same ratio."}))
@@ -269,7 +269,7 @@ public final class SuperStackConfig {
         int previousAbbreviate = abbreviateAbove;
 
         try {
-            maxStackSize = MAX_STACK_SIZE.get();
+            maxStackSize = Math.min(MAX_STACK_SIZE.get(), SuperStack.ABSOLUTE_MAX_STACK_SIZE);
             scaleSmallItems = SCALE_SMALL_ITEMS.get();
             keepUnstackable = KEEP_UNSTACKABLE.get();
             countStyle = COUNT_STYLE.get();
@@ -376,35 +376,14 @@ public final class SuperStackConfig {
     /** 原版 ExtraCodecs.intRange(1, 99) 是堆叠上限的校验范围，把上界换掉。 */
 
     /**
-     * 编解码器的数量上限。{@code ItemStack.CODEC} 在类初始化时就建好，那时配置文件可能还没读完，
-     * 所以这里在必要时直接读一遍配置文件，保证「改配置 + 重启」就能生效。
+     * 编解码器的数量上限：固定为 {@link SuperStack#ABSOLUTE_MAX_STACK_SIZE}，不跟配置走。
+     *
+     * <p>原因见常量注释——{@code ItemStack.CODEC} 在类初始化时构建，早于配置加载；
+     * 之前让上界跟配置走，就出现过"codec 按默认 32768 建好，配置文件里写的是 21 亿"
+     * 从而进服时 update_recipes 编码失败的问题。
      */
     public static int codecUpperBound() {
-        int fromFile = readMaxStackSizeFromFile();
-        return Math.max(maxStackSize, fromFile > 64 ? fromFile : 0);
-    }
-
-    private static int readMaxStackSizeFromFile() {
-        try {
-            java.nio.file.Path path = net.neoforged.fml.loading.FMLPaths.CONFIGDIR.get()
-                    .resolve("superstack-common.toml");
-            if (!java.nio.file.Files.exists(path)) {
-                return -1;
-            }
-            for (String line : java.nio.file.Files.readAllLines(path, java.nio.charset.StandardCharsets.UTF_8)) {
-                String trimmed = line.trim();
-                if (!trimmed.startsWith("maxStackSize")) {
-                    continue;
-                }
-                int eq = trimmed.indexOf('=');
-                if (eq > 0) {
-                    return Integer.parseInt(trimmed.substring(eq + 1).trim());
-                }
-            }
-        } catch (Exception ignored) {
-            // 读不到就用默认值，不影响启动。
-        }
-        return -1;
+        return SuperStack.ABSOLUTE_MAX_STACK_SIZE;
     }
 
     public static int raiseCodecUpperBound(int bound) {
