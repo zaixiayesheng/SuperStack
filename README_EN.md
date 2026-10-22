@@ -196,7 +196,9 @@ gradlew test      # 8 unit tests for BulkCraftMath
 
 ## Changelog
 
-### 21.1-1.0.7
+### 21.1-1.1.0
+
+Local build, not published yet.
 
 - Oritech machine and storage slots no longer stop at 64; Ad Astra already uses vanilla containers and needs no patch.
 - Fixed: with a billion-scale stack limit, joining a server could be kicked by the recipe sync packet (`update_recipes`), because recipe ingredient counts exceeded the codec range; the count range is now always opened up to the int limit.
