@@ -13,7 +13,7 @@ English version: [README_EN.md](./README_EN.md)
 [![Release](https://img.shields.io/github/v/release/zaixiayesheng/SuperStack?filter=v21.1*&style=flat-square&label=Release&color=blue)](https://github.com/zaixiayesheng/SuperStack/releases)
 [![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-green.svg?style=flat-square)](https://www.minecraft.net)
 [![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1+-orange.svg?style=flat-square)](https://neoforged.net)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+[![License: AGPL-3.0](./LICENSE)](https://www.gnu.org/licenses/agpl-3.0.txt)
 
 [这是什么](#这是什么) · [安装](#安装) · [堆叠上限](#堆叠上限) · [数量显示](#数量显示) · [合成与容器](#合成与容器) · [槽位兼容](#槽位兼容) · [配置](#配置) · [常见问题](#常见问题) · [兼容性](#兼容性) · [开发者](#开发者) · [更新日志](#更新日志)
 
@@ -47,7 +47,7 @@ English version: [README_EN.md](./README_EN.md)
 
 | 原版上限 | 抬升后（默认配置） |
 |---|---|
-| 64 | 32,768 |
+| 64 | 65,536 |
 | 16 | 8,192 |
 | 8 | 4,096 |
 | 1 | 1（不放大） |
@@ -141,8 +141,8 @@ Shift 点击合成结果时，先算「合成格最少的那一格够合几次�
 **服务端装了、客户端没装？**
 客户端仍按 64 显示与操作，放不进去的部分由服务端拒绝，表现为「点了没反应」。两端都要装。
 
-**为什么一叠不是 32768？**
-16 上限的物品按比例放大成 8192。想要全部 32768，把 `scaleSmallItems` 关掉。
+**为什么一叠不是 65,536？**
+16 上限的物品按比例放大成 16,384。想要全部 65,536，把 `scaleSmallItems` 关掉。
 
 **精妙界面里看不到本模组的角标？**
 精妙自己会画缩写数量，本模组在那类界面里主动让位。
@@ -278,7 +278,9 @@ gradlew test      # BulkCraftMath 的 8 个单元测试
 
 ## 许可证与署名
 
-[MIT](./LICENSE) © 2026 zaixiayesheng。图标由本项目自行绘制。
+[AGPL-3.0](./LICENSE) © 2026 zaixiayesheng。图标由本项目自行绘制。
+
+本项目以 **GNU Affero General Public License v3.0** 发布，可以自由使用、复制、分发与修改；但分发修改版（包括以网络服务的形式提供）时必须同样以 AGPL-3.0 公开完整的对应源码，不得改回闭源协议。1.0.7 及更早的历史版本按当时声明的 MIT 授权发布。
 
 ## 反馈
 
