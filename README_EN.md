@@ -192,15 +192,15 @@ Jars needed by the third-party patches live in `libs/` as `compileOnly` dependen
 ## Changelog
 
 ### 20.1-1.0.2
-- Supported mods' slot limits no longer add a separate ceiling: they follow the stack size, so modded machine slots accept the same large stacks.
-- MoreMachine big-stack slots: the x8 multiplication now saturates instead of throwing once the stack limit passes 268 million.
+- The stack limit can now go up to 2,147,483,647 (the 32-bit int ceiling), range 64-2,147,483,647, default is still 32768.
+- Bulk crafting now counts in long: ingredients, products and returned containers are all computed in long and written back in chunks capped by each stack limit, so a two-billion stack does not lose items to int overflow.
+- Ground item merging follows the configured limit: counts are added as long and the hard-coded 64 inside vanilla `merge` is replaced by the config value; stacks above the limit stay split.
+- Compat slots now simply follow the stack limit instead of having their own ceiling; the Applied Energistics, Mekanism, Sophisticated, MoreMachine, Mystical Agriculture and Iron Furnaces patches can each be disabled.
+- MoreMachine big-stack slots: the x8 limit uses a saturating multiply, so limits above 268M no longer overflow and throw.
+- Sophisticated Storage: sorting is skipped when the combined count of identical items exceeds int; previously it overflowed negative and wiped both stacks.
+- Iron Furnaces: fixed an OOM caused by loading the container limit as an inventory array size (furnaces could fail to load and lose contents).
+- Config rework: sections are now Basic / Advanced / Mod compat, keys are unified (`scaleSmallItems`, `countStyle`, `otherModSlots`, ...), and both the config screen and the generated comments follow the system language.
 
-- Sophisticated Storage: sorting now does nothing when matching items add up past an int; previously the total overflowed negative and both stacks were wiped.
-- Iron Furnaces: fixed an out-of-memory crash while loading a furnace, caused by the mod using the container limit as its inventory size.
-- The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64–2,147,483,647 instead of 64–1,000,000. The default stays 32,768.
-- Bulk crafting keeps every intermediate value in a long and writes output plus returned items in chunks bounded by their own stack limits, so a two-billion stack cannot overflow and silently lose items.
-- Ground item merging is guarded: two big stacks no longer take part in vanilla's 64-per-step merge, which could overflow the added counts; stacks of 64 or less merge as before.
-- Verified: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt keep their counts across a save and reload; two two-billion stacks next to each other do not merge.
 
 <details>
 <summary><b>20.1-1.0.1</b></summary>
