@@ -19,6 +19,7 @@
   "superstack.configuration.compatIronFurnaces": "更多熔炉",
   "superstack.configuration.compatMysticalAgriculture": "神秘农业",
   "superstack.configuration.compatCreate": "机械动力",
+  "superstack.configuration.compatImmersiveEngineering": "沉浸工程",
   "superstack.tooltip.count": "数量：%s / %s",
   "superstack.configuration.experimentalStackSizes": "实验性堆叠上限"
 }

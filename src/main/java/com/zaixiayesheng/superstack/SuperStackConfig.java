@@ -84,6 +84,17 @@ public final class SuperStackConfig {
             .translation("superstack.configuration.otherModSlots")
             .define("otherModSlots", true);
 
+    private static final ForgeConfigSpec.IntValue FAN_STACK_COUNT = BUILDER
+            .comment(Text.pick(new String[]{
+                    "机械动力：鼓风机按多少个物品来算处理时长。",
+                    "64 等于原版一组的速度；调到 1 表示不论多少个都按原版单组最快处理。"
+            }, new String[]{
+                    "Create: how many items the fan processing time is based on.",
+                    "64 matches the vanilla one-stack speed; 1 always uses the quickest single-stack timing."
+            }))
+            .translation("superstack.configuration.fanStackCount")
+            .defineInRange("fanStackCount", 64, 1, 64);
+
     static {
         BUILDER.pop();
     }
@@ -128,6 +139,11 @@ public final class SuperStackConfig {
             .translation("superstack.configuration.compatCreate")
             .define("compatCreate", true);
 
+    private static final ForgeConfigSpec.BooleanValue IMMERSIVE_ENGINEERING_PATCH = BUILDER
+            .comment(Text.pick(new String[]{"沉浸工程：木箱、工具箱、计量分配器这类容器的槽位上限。"}, new String[]{"Immersive Engineering crates, toolboxes and batchers."}))
+            .translation("superstack.configuration.compatImmersiveEngineering")
+            .define("compatImmersiveEngineering", true);
+
     static {
         BUILDER.pop();
     }
@@ -142,6 +158,7 @@ public final class SuperStackConfig {
     private static volatile int abbreviateAbove = 10000;
     private static volatile boolean tooltipExact = true;
     private static volatile boolean otherModSlots = true;
+    private static volatile int fanStackCount = 64;
     private static volatile boolean compatMekanism = true;
     private static volatile boolean compatMekmm = true;
     private static volatile boolean compatAe2 = true;
@@ -149,10 +166,11 @@ public final class SuperStackConfig {
     private static volatile boolean compatIronFurnaces = true;
     private static volatile boolean compatMysticalAgriculture = true;
     private static volatile boolean compatCreate = true;
+    private static volatile boolean compatImmersiveEngineering = true;
 
 
     public enum CompatPatch {
-        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE;
+        MEKANISM, MEKMM, AE2, SOPHISTICATED, IRON_FURNACES, MYSTICAL_AGRICULTURE, CREATE, IMMERSIVE_ENGINEERING;
     }
 
     public static boolean compatEnabled(CompatPatch patch) {
@@ -164,6 +182,7 @@ public final class SuperStackConfig {
             case IRON_FURNACES -> compatIronFurnaces;
             case MYSTICAL_AGRICULTURE -> compatMysticalAgriculture;
             case CREATE -> compatCreate;
+            case IMMERSIVE_ENGINEERING -> compatImmersiveEngineering;
         };
     }
 
@@ -184,7 +203,11 @@ public final class SuperStackConfig {
     }
 
     public static int fanCountFor(int count) {
-        return count;
+        return Math.min(count, fanStackCount);
+    }
+
+    public static int fanStackCount() {
+        return fanStackCount;
     }
 
     public static int mekmmSlotLimit(int original) {
@@ -255,6 +278,7 @@ public final class SuperStackConfig {
             abbreviateAbove = ABBREVIATE_ABOVE.get();
             tooltipExact = TOOLTIP_EXACT.get();
             otherModSlots = OTHER_MOD_SLOTS.get();
+            fanStackCount = FAN_STACK_COUNT.get();
             compatMekanism = MEKANISM_PATCH.get();
             compatMekmm = MEKMM_PATCH.get();
             compatAe2 = AE2_PATCH.get();
@@ -262,6 +286,7 @@ public final class SuperStackConfig {
             compatIronFurnaces = IRON_FURNACES_PATCH.get();
             compatMysticalAgriculture = MYSTICAL_AGRICULTURE_PATCH.get();
             compatCreate = CREATE_PATCH.get();
+            compatImmersiveEngineering = IMMERSIVE_ENGINEERING_PATCH.get();
 
         } catch (IllegalStateException e) {
             // 配置还没加载完就被调用，用默认值

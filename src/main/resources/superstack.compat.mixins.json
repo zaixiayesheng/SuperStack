@@ -16,10 +16,12 @@
     "IronFurnacesFurnaceTileMixin",
     "SophisticatedInventorySorterMixin",
     "Ae2KeyTypeMixin",
-    "SophisticatedQuickCraftMixin"
-    "Ae2GenericStackInvMixin"
-    "Ae2GenericStackItemStorageMixin"
-    "SophisticatedStorageInputMixin"
+    "SophisticatedQuickCraftMixin",
+    "Ae2GenericStackInvMixin",
+    "Ae2GenericStackItemStorageMixin",
+    "CreateFanProcessingMixin",
+    "IEInventoryHandlerMixin",
+    "IEBlockSlotLimitMixin"
   ],
   "injectors": {
     "defaultRequire": 1

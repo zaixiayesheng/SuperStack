@@ -107,6 +107,8 @@ Vanilla containers follow automatically. For other mods there are two cases: slo
 | Applied Energistics 2 | 15.4.11 | Terminal slots stop at 64 and `InternalInventory` defaults to 99; crafted output is no longer split into stacks of 99 when moved to the invento; import/export buses move a whole stack per operation |y or cursor |
 | Sophisticated Core / Storage / Backpacks | 1.5.x / 1.5.x / 3.26.x | The crafting upgrade's 9 slots stop at 99; container slot limits and screen rendering are managed by Sophisticated itself |
 | Iron Furnaces | 4.1.8 | Inventory and output slots hardcode 64; both follow the config |
+| Create | 6.0.8 | Fans time processing by `fanStackCount` items instead of the real count |
+| Immersive Engineering | 10.2.0-183 | Crates, toolboxes, item batchers, circuit tables, turrets and bottling-machine inputs hardcode 64; they now follow the config |
 
 The patches live in a separate `superstack.compat.mixins.json` with `required: false`: when a target class is missing, only a log line is written and startup continues.
 
@@ -116,14 +118,15 @@ The file is `config/superstack-common.toml`; restart after editing.
 
 | Option | Default | Range | Meaning |
 |---|---|---|---|
-| `maxStackSize` | 32768 | 64 to 2,147,483,647 | Items per slot; restart after changing |
+| `maxStackSize` | 65536 | 64 to 1,073,741,823 | Items per slot; restart after changing |
+| `experimentalStackSizes` | false | on / off | Allow values above 65536 (up to 1,073,741,823) |
 | `scaleSmallItems` | true | on / off | Items that stack below 64 (ender pearls, eggs) scale up too |
 | `keepUnstackable` | true | on / off | Keep tools, buckets and armour at one per slot |
 | `countStyle` | COMPACT | COMPACT / EXACT | Abbreviate slot counts (12.3k) or always draw the full number |
 | `abbreviateAbove` | 10000 | 1,000 to 1,000,000 | Count from which abbreviations start |
 | `tooltipExact` | true | on / off | Show the exact count on the tooltip |
 | `otherModSlots` | true | on / off | Widen other mods' slot limits so sorting does not truncate stacks |
-| `fanStackCount` | 64 | 1 to 64 | Stack count used for Create fan processing time (not present on 1.20.1) |
+| `fanStackCount` | 64 | 1 to 64 | Stack count used for Create fan processing time |
 
 Only the first option needs attention; `compatStackLimit` is gone and supported mods' slot limits now follow `maxStackSize` directly. The first three live under `[basic]`, the rest under `[advanced]`.
 
@@ -157,7 +160,8 @@ Only vanilla crafting screens are batched. Sophisticated and Applied Energistics
 | KubeJS | Its `remove_slot_limit` passes through and does not lower the limit |
 | Inventory sorting mods | Read `ItemStack.getMaxStackSize()` and leave the overflow in place |
 | Functional Storage | Drawer capacity scales with the item limit — expected |
-| Immersive Engineering / EnderIO / Create | These ship their own inventory interfaces with hardcoded limits; not changed here |
+| Immersive Engineering / Create | Crates, toolboxes, batchers, circuit tables, turrets, bottling inputs and fan processing follow the config |
+| EnderIO | Its inventory layouts carry their own hardcoded limits; not changed here |
 
 The mod changes saved data, so back up or test in a throwaway world first.
 
@@ -199,6 +203,7 @@ Jars needed by the third-party patches live in `libs/` as `compileOnly` dependen
 - Drag splitting now divides in integers, so one 2^30-1 stack split across two slots no longer creates an extra item.
 - A stack never reports a maximum below its own count, which keeps the "limit - count" headroom non-negative.
 - Ported the AE2 generic-storage and Sophisticated patches to 1.20.1 (interfaces accept whole stacks from pipes, sorting no longer eats items).
+- Two more mods covered: Create fans time processing by `fanStackCount` items instead of the real count (verified against 6.0.8), and Immersive Engineering crates, toolboxes, item batchers, circuit tables, turrets and bottling-machine inputs no longer hardcode 64.
 
 
 ### 20.1-1.0.3

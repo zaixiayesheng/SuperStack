@@ -19,6 +19,7 @@
   "superstack.configuration.compatIronFurnaces": "Iron Furnaces",
   "superstack.configuration.compatMysticalAgriculture": "Mystical Agriculture",
   "superstack.configuration.compatCreate": "Create",
+  "superstack.configuration.compatImmersiveEngineering": "Immersive Engineering",
   "superstack.tooltip.count": "Count: %s / %s",
   "superstack.configuration.experimentalStackSizes": "Experimental stack sizes"
 }
