@@ -191,16 +191,16 @@ gradlew test      # 8 unit tests for BulkCraftMath
 ## Changelog
 
 ### 21.1-1.0.6
-- Ground item stacks merge up to the configured limit without overflowing: counts are added as long, and the hard-coded 64 inside vanilla `merge` now uses the config. Measured: 1.5e9 + 5e8 merges into 2e9, while 1.5e9 + 1.5e9 stays as two stacks.
-- The stack limit can now be configured up to 2,147,483,647 (the 32-bit int limit); the range is 64 to 2,147,483,647 instead of 64 to 1,000,000. The default stays 32,768.
-- Bulk crafting accounts with long all the way: ingredients, output and returned items are chunked by their own limits, so a single slot holding two billion items cannot lose anything to int overflow.
-- Supported mods' slot limits now follow the stack size directly and there is no separate option; if a mod treats the limit as an array length, lower the stack size instead.
-- More Machine large-stack slots: the "multiply by 8" path uses saturating multiplication and the result is capped at the configured stack limit (it used to reach 262,144, beyond the item limit, and got truncated on save).
-- Mystical Agriculture / Automation: Cucumber's shared slot default of 64 now uses the compat limit, so infusion machines accept large stacks; slots with an explicit limit keep it.
-- Sophisticated Core: sorting no longer runs when same-item totals exceed int; it used to overflow into a negative number and wipe both stacks.
-- Create fans: processing time no longer scales with the real stack count without limit. The count used is capped by `fanStackCount` (default 64): small stacks keep their real count and behave exactly like vanilla, large stacks are treated as 64. A 32,768 stack used to be 2,048x slower, which looked like the fan had stopped working.
-- Create: the filter's "extract amount" range is back to the vanilla 64. It draws the scale bar from the filtered item's limit, and 32,768 stretched the screen past its edges; stored values above 64 are clamped when the block loads.
-- Measured: a chest holding 2,000,000,000 stone and an item entity holding 2,147,483,647 dirt both survive a save and reload unchanged; two adjacent stacks of 2e9 do not merge.
+- The stack limit can now go up to 2,147,483,647 (the 32-bit int ceiling), range 64-2,147,483,647, default is still 32768.
+- Bulk crafting now counts in long: ingredients, products and returned containers are all computed in long and written back in chunks capped by each stack limit, so a two-billion stack does not lose items to int overflow.
+- Ground item merging follows the configured limit: counts are added as long and the hard-coded 64 inside vanilla `merge` is replaced by the config value. Measured: 1.5B + 0.5B merges into 2B, while 1.5B + 1.5B stays split.
+- Compat slots now simply follow the stack limit instead of having their own ceiling; the Applied Energistics, Mekanism, Sophisticated, MoreMachine, Mystical Agriculture and Create patches can each be disabled.
+- MoreMachine big-stack slots: the x8 limit uses a saturating multiply and is clamped back to the configured stack limit instead of overflowing to 262,144 and being truncated on save.
+- Mystical Agriculture / Mystical Automation: the shared Cucumber library hard-codes a slot limit of 64; it now uses the compat limit so infusers and friends accept big stacks, while explicitly sized slots keep their value.
+- Sophisticated Storage: sorting is skipped when the combined count of identical items exceeds int; previously it overflowed negative and wiped both stacks.
+- Create fans: the count used for processing time is capped by `fanStackCount` (default 64), so small stacks behave exactly like vanilla and big stacks count as 64. The filter/extraction amount setting is clamped to 64 so its screen no longer blows up.
+- Config rework: sections are now Basic / Advanced / Mod compat, keys are unified (`scaleSmallItems`, `countStyle`, `otherModSlots`, ...), and both the config screen and the generated comments follow the system language.
+
 
 <details>
 <summary><b>21.1-1.0.5</b></summary>
