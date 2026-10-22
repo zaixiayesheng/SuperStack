@@ -197,6 +197,7 @@ gradlew test      # 8 unit tests for BulkCraftMath
 ### 21.1-1.0.7
 
 - Oritech machine and storage slots no longer stop at 64; Ad Astra already uses vanilla containers and needs no patch.
+- Generator Galore: with stacked fuels, the enchantment and container-return branches no longer replace the whole fuel slot with a single item.
 
 - Applied Energistics 2 import/export buses now move a whole stack per operation instead of one item: before, even fully speed-upgraded buses capped at 64 operations x 1 item = 64 items/tick.
 - It follows `maxStackSize` automatically with no extra config; turning off `compat.ae2` restores the vanilla one-by-one behaviour.
